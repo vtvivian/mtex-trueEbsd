@@ -21,6 +21,8 @@ boundary = [xmin+1,ymin+1,xmax-xmin-1,ymax-ymin-1]; %[left edge top edge width h
 
 % perform the XCF and determine shift in x  shift in y and peak height
 [ROI.Shift_X_1,ROI.Shift_Y_1,CCmax_1] = fDIC_xcf_mat_mex(Image_ref,Image_test,ROI,Filters_setting,XCF_mesh,hfilter,FFTfilter);
+% %replace with the next line if fDIC_xcf_mat_mex doesn't work
+% [ROI.Shift_X_1,ROI.Shift_Y_1,CCmax_1] = fDIC_xcf_mat(Image_ref,Image_test,ROI,Filters_setting,XCF_mesh,hfilter,FFTfilter);
 
 %% fit a surface to the shift vector
 % figure, imagesc(ROI.Shift_X_1); axis equal; caxis([-15 -5]);

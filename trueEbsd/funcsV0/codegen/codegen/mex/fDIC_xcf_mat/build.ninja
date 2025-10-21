@@ -1,0 +1,67 @@
+# CompilerName=gcc
+# Mode=optim
+ninja_required_version = 1.3
+
+# Basic folders
+root = .
+builddir = $root/build/glnxa64
+matlabdir = /usr/local/MATLAB/R2025a
+startdir = /home/rock/Documents/Git-projects/mtex-trueEbsd/trueEbsd/funcsV0/codegen
+
+# Toolchain information
+cc = /usr/bin/gcc
+cxx = /usr/bin/g++
+linker = /usr/bin/gcc
+linkerxx = /usr/bin/g++
+
+cflags =  -fexceptions -fPIC -fno-omit-frame-pointer -pthread -fwrapv -D_GNU_SOURCE -DMATLAB_MEX_FILE  -O2 -DNDEBUG -fno-predictive-commoning -std=c99 -I "$root" -I "$startdir" -I "$root/interface" -I "$matlabdir/extern/include" -I "." -DMODEL=fDIC_xcf_mat_mex -msse2 -fno-predictive-commoning -Wno-stringop-overflow -Wno-maybe-uninitialized -c -fopenmp -DOMPLIBNAME="$matlabdir/sys/os/glnxa64/libiomp5.so" 
+
+cxxflags =  -fexceptions -fPIC -fno-omit-frame-pointer -pthread -fwrapv -D_GNU_SOURCE -DMATLAB_MEX_FILE  -O2 -DNDEBUG -fno-predictive-commoning -std=c++11 -I "$root" -I "$startdir" -I "$root/interface" -I "$matlabdir/extern/include" -I "." -DMODEL=fDIC_xcf_mat_mex -msse2 -fno-predictive-commoning -Wno-stringop-overflow -Wno-maybe-uninitialized -c -fopenmp -DOMPLIBNAME="$matlabdir/sys/os/glnxa64/libiomp5.so" 
+
+ldflags =  -pthread -Wl,--no-undefined -Wl,-rpath-link,$matlabdir/bin/glnxa64 -shared  -L"$matlabdir/bin/glnxa64" -lmx -lmex -lmat -lm -lstdc++  -Wl,-Bsymbolic -o fDIC_xcf_mat_mex.mexa64 -L"$matlabdir/bin/glnxa64" -lmwblas -lemlrt -lcovrt -lut -lmwmathutil -fPIC -L"$matlabdir/sys/os/glnxa64" -liomp5 -Wl,--version-script,fDIC_xcf_mat.map
+
+ldxxflags =  -pthread -Wl,--no-undefined  -shared -lstdc++ -Wl,--as-needed -Wl,-rpath-link,$matlabdir/bin/glnxa64 -L"$matlabdir/bin/glnxa64" -Wl,-rpath-link,$matlabdir/extern/bin/glnxa64 -L"$matlabdir/extern/bin/glnxa64" -lMatlabDataArray -lmx -lmex -lm -lmat  -Wl,-Bsymbolic -o fDIC_xcf_mat_mex.mexa64 -L"$matlabdir/bin/glnxa64" -lmwblas -lemlrt -lcovrt -lut -lmwmathutil -fPIC -L"$matlabdir/sys/os/glnxa64" -liomp5 -Wl,--version-script,fDIC_xcf_mat.map
+
+linkobjs = 
+
+# Build Rules
+rule cc
+    command = $cc $cflags $in -o $out
+
+rule cxx
+    command = $cxx $cxxflags $in -o $out
+
+rule link
+    command = $linker $in $linkobjs $ldflags
+
+rule linkxx
+    command = $linkerxx $in $linkobjs $ldxxflags
+
+# Build
+build $builddir/fDIC_xcf_mat_data.o : cc $root/fDIC_xcf_mat_data.c
+build $builddir/rt_nonfinite.o : cc $root/rt_nonfinite.c
+build $builddir/fDIC_xcf_mat_initialize.o : cc $root/fDIC_xcf_mat_initialize.c
+build $builddir/fDIC_xcf_mat_terminate.o : cc $root/fDIC_xcf_mat_terminate.c
+build $builddir/fDIC_xcf_mat.o : cc $root/fDIC_xcf_mat.c
+build $builddir/blockedSummation.o : cc $root/blockedSummation.c
+build $builddir/sumMatrixIncludeNaN.o : cc $root/sumMatrixIncludeNaN.c
+build $builddir/std.o : cc $root/std.c
+build $builddir/fft2.o : cc $root/fft2.c
+build $builddir/fReg.o : cc $root/fReg.c
+build $builddir/ifft2.o : cc $root/ifft2.c
+build $builddir/relop.o : cc $root/relop.c
+build $builddir/indexShapeCheck.o : cc $root/indexShapeCheck.c
+build $builddir/mtimes.o : cc $root/mtimes.c
+build $builddir/assertValidSizeArg.o : cc $root/assertValidSizeArg.c
+build $builddir/_coder_fDIC_xcf_mat_api.o : cc $root/interface/_coder_fDIC_xcf_mat_api.c
+build $builddir/_coder_fDIC_xcf_mat_mex.o : cc $root/interface/_coder_fDIC_xcf_mat_mex.c
+build $builddir/eml_int_forloop_overflow_check.o : cc $root/eml_int_forloop_overflow_check.c
+build $builddir/eml_fftshift.o : cc $root/eml_fftshift.c
+build $builddir/ifftshift.o : cc $root/ifftshift.c
+build $builddir/exp.o : cc $root/exp.c
+build $builddir/fDIC_xcf_mat_emxutil.o : cc $root/fDIC_xcf_mat_emxutil.c
+build $builddir/_coder_fDIC_xcf_mat_info.o : cc $root/interface/_coder_fDIC_xcf_mat_info.c
+build $builddir/c_mexapi_version.o : cc $matlabdir/extern/version/c_mexapi_version.c
+
+# Link
+build $root/fDIC_xcf_mat_mex.mexa64 : link $builddir/fDIC_xcf_mat_data.o $builddir/rt_nonfinite.o $builddir/fDIC_xcf_mat_initialize.o $builddir/fDIC_xcf_mat_terminate.o $builddir/fDIC_xcf_mat.o $builddir/blockedSummation.o $builddir/sumMatrixIncludeNaN.o $builddir/std.o $builddir/fft2.o $builddir/fReg.o $builddir/ifft2.o $builddir/relop.o $builddir/indexShapeCheck.o $builddir/mtimes.o $builddir/assertValidSizeArg.o $builddir/_coder_fDIC_xcf_mat_api.o $builddir/_coder_fDIC_xcf_mat_mex.o $builddir/eml_int_forloop_overflow_check.o $builddir/eml_fftshift.o $builddir/ifftshift.o $builddir/exp.o $builddir/fDIC_xcf_mat_emxutil.o $builddir/_coder_fDIC_xcf_mat_info.o $builddir/c_mexapi_version.o 
