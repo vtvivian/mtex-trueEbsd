@@ -156,8 +156,8 @@ classdef distortedImg
                         error('Square grid EBSD maps only');
                     end
                 end
-                disImg.dx = disImg.ebsd.dx;
-                disImg.dy = disImg.ebsd.dy;
+                disImg.dx = disImg.ebsd.d2.norm;
+                disImg.dy = disImg.ebsd.d1.norm; % dx/dy match to d1/d2 is arbitrary here -- depends on ebsd.how2plot
 
                 % extract img if required
                 if isa(img,'char')
