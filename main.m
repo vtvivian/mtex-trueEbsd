@@ -44,7 +44,7 @@ tic
 % vId can be a number or char array
 try vId = githash(fullfile(mpath,[mname,mext])); catch, vId = '0'; end
 
-dataPath = '/media/Files/RockShare/Work/Projects/2025_TrueEBSD_Birmingham_VGagneur/Test-Data-fcc-Ni';
+dataPath = '/media/Files/RockShare/Work/Projects/2025_TrueEBSD_BU_VG1/Test-Data-fcc-Ni';
 % dataPath = uigetdir([],'Select input data folder');
 [~, t, ~] = fileparts(dataPath);
 dataName = removeweirdchars(t);
