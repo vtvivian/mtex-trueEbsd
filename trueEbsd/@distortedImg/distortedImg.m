@@ -156,8 +156,8 @@ classdef distortedImg
                         error('Square grid EBSD maps only');
                     end
                 end
-                disImg.dx = disImg.ebsd.d2.norm;
-                disImg.dy = disImg.ebsd.d1.norm; % dx/dy match to d1/d2 is arbitrary here -- depends on ebsd.how2plot
+                disImg.dx = double(disImg.ebsd.d2.norm);
+                disImg.dy = double(disImg.ebsd.d1.norm); % dx/dy match to d1/d2 is arbitrary here -- depends on ebsd.how2plot
 
                 % extract img if required
                 if isa(img,'char')
@@ -165,8 +165,8 @@ classdef distortedImg
                 end
             else
                 dxy = get_option(varargin,'dxy',0,{'double';'single';'uint8';'uint16';'uint32'});
-                disImg.dx = dxy(1);
-                disImg.dy = dxy(end);
+                disImg.dx = double(dxy(1));
+                disImg.dy = double(dxy(end));
             end
 
             % default XCF settings
