@@ -1,17 +1,18 @@
 %% WP1 - MTEX TrueEBSD
 % Description
 % main script to run trueEBSD workflow
-% MATLAB R2025a and mtex (develop) in subtree
+% MATLAB R2025a and mtex 6.1 (develop)
 
 % Version 20240721 - inherited from NPL/EBSD Interfaces 2024 project
 %
-% Inputs 
-% dataName = @char array, relative path to dataset from
-%       fullfile(cd,'\..\Data\') 
-% loadDemoData_<dataName1>.m  user-created import script where 
-%       dataName1 = dataName with illegal characters removed (non alphabetic, 
-%   numeric, or underscore). See dataLoader/loadDemoData.m for more
-%   information on how to write the loadDemoData_<dataName1>.m script.
+% % Inputs 
+% Section "Import data + file saving:"
+% dataPath = folder path to input data files (images, text, or hdf5
+% format)
+% setSave = do you want to save outputs? 1 (yes) or 0 (no)
+% Section "Load EBSD data and images"
+% dataPath = folder path to input data files (images, text, or hdf5
+% format)
 % setSave = do you want to save outputs? 1 (yes) or 0 (no)
 % 
 % Outputs
