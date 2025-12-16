@@ -8,12 +8,12 @@ function job = calcShifts(job, varargin)
 % job = calcShifts(job.'fitErr');
 % 
 % Description:
-%   1. Get job.resizedList{n}.edge for image cross-correlation
+%   1. Get job.resizedList(n).edge for image cross-correlation
 %   2. Decide image correlation sequence:
 %     a. n = nStart: start with first image with high edge contrast (if no images have high edge contrast then nStart=1)
 %     b. Call WP1_TrueEBSD/funcsV0/fRunDIC() to calculate XY shifts between [n+1, n] image pairs
 %     c. Iterate n++ and repeat until n+1 = reference image (i.e. job.resizedList{end})
-%     d. Whenever job.resizedList{n} has 'highContrast' = false, remap intensities using shifts measured from the previous iteration using the remapImage() which is nested inside this function
+%     d. Whenever job.resizedList(n) has 'highContrast' = false, remap intensities using shifts measured from the previous iteration using the remapImage() which is nested inside this function
 %     e. If nStart > 1, loop back round to n=nStart-1 and repeat for [nStart, nStart-1] image pairs
 %         and repeat steps c. and d. with n-- until you reach n=1 
 %         The for-loop order runs the other way so that one image in the pair always
@@ -22,11 +22,11 @@ function job = calcShifts(job, varargin)
 %
 % Inputs
 %   job = @trueEbsd object. This function uses properties: 
-%   -	test image - job.resizedList{n}.img or .edge - set this in job.resizedList{n}.setXCF{1}.xcfImg, default is 'edge'
-%   -	reference image - job.resizedList{n+1}.img or .edge
-%   -	job.resizedList{n}.setXCF - structure containing ROI size and spacing settings,
+%   -	test image - job.resizedList(n).img or .edge - set this in job.resizedList(n).setXCF{1}.xcfImg, default is 'edge'
+%   -	reference image - job.resizedList(n+1).img or .edge
+%   -	job.resizedList(n).setXCF - structure containing ROI size and spacing settings,
 %           description in @distortedImg/distortedImg and @trueEbsd/pixelSizeMatch
-%   -	job.resizedList{n}.distortionModel{:} (description in @distortedImg)
+%   -	job.resizedList(n).distortionModel(:) (description in @distortedImg)
 % 
 % Optional input flags
 %  'fitErr' - calculate residual shifts after fitting each image pair and
@@ -40,8 +40,8 @@ function job = calcShifts(job, varargin)
 % job.shifts - (n,1)(m,1) nested cell array with where 
 %       n = (number of images in job - 1) = numel(job.resizedList)-1
 %       m = number of distortionModels linked to
-%           job.resizedList{n}.distortionName - find in current image
-%           numel(job.resizedList{n}.distortionModel). 
+%           job.resizedList(n).distortionName - find in current image
+%           numel(job.resizedList(n).distortionModel). 
 %           e.g. let job.resizedList{1}.distortionName = ‘tilt’;
 %           so job.resizedList{1}.distortionModel = {'projective','poly11','poly22'};
 %           therefore m=3. 
@@ -80,7 +80,7 @@ job.shifts = cell(1,numel(job.resizedList)-1);
 % decide where to start - nstart = smallest n with a
 % high-contrast image, go to n = max, then go backwards from nstart to
 % n = 1
-hCList = cat(1,cat(1,job.resizedList{:}).highContrast);
+hCList = cat(1,cat(1,job.resizedList(:)).highContrast);
 nStart = find(hCList,1,'first');
 
 if numel(job.resizedList) > nStart
@@ -90,8 +90,8 @@ if numel(job.resizedList) > nStart
 % Described in Steps 2a-c of the function header
     for n=nStart:numel(job.resizedList)-1
         %initialise variables in for-loop
-        ref = job.resizedList{n+1};
-        test = job.resizedList{n};
+        ref = job.resizedList(n+1);
+        test = job.resizedList(n);
 
 
         disp([newline 'Calculating shifts between images ' num2str(n+1) ' and ' num2str(n) ' (' test.distortionName '):']);
@@ -164,8 +164,8 @@ if nStart>1
     for n=nStart-1:-1:1 %start at nStart-1, because nStart is the first ref
         %in both for-loops, n refers to the index of the test image
         %initialise variables in for-loop
-        ref = job.resizedList{n+1};
-        test = job.resizedList{n};
+        ref = job.resizedList(n+1);
+        test = job.resizedList(n);
 
         disp([newline 'Calculating shifts between images ' num2str(n+1) ' and ' num2str(n) ' (' test.distortionName '):']);
         
