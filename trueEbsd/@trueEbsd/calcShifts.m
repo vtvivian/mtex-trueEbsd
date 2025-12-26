@@ -22,7 +22,7 @@ function job = calcShifts(job, varargin)
 %
 % Inputs
 %   job = @trueEbsd object. This function uses properties: 
-%   -	test image - job.resizedList(n).img or .edge - set this in job.resizedList(n).setXCF{1}.xcfImg, default is 'edge'
+%   -	test image - job.resizedList(n).img or .edge - set this in job.resizedList(n).setXCF(1).xcfImg, default is 'edge'
 %   -	reference image - job.resizedList(n+1).img or .edge
 %   -	job.resizedList(n).setXCF - structure containing ROI size and spacing settings,
 %           description in @distortedImg/distortedImg and @trueEbsd/pixelSizeMatch
@@ -64,8 +64,8 @@ function job = calcShifts(job, varargin)
 %  
 % 
 % Requirements:
-%  - Uses MATLAB’s Curve Fitting Toolbox - fit()
-% 
+%  - Uses Curve Fitting Toolbox - fit()
+%  - Uses Statistics and Machine Learning Toolbox - robustfit()
 % 
 
 if ~isempty(varargin)
@@ -96,10 +96,10 @@ if numel(job.resizedList) > nStart
 
         disp([newline 'Calculating shifts between images ' num2str(n+1) ' and ' num2str(n) ' (' test.distortionName '):']);
 
-        imRef = ref.(ref.setXCF{1}.xcfImg);
+        imRef = ref.(ref.setXCF(1).xcfImg);
         % if imTestNew was created at the end of the last loop iteration,
         % read imTest from that
-        if exist('imTestNew','var'), imTest = imTestNew; else, imTest = test.(test.setXCF{1}.xcfImg); end; clear imTestNew
+        if exist('imTestNew','var'), imTest = imTestNew; else, imTest = test.(test.setXCF(1).xcfImg); end; clear imTestNew
 
         % if no distortion (i.e. the distortion name is 'true')
         if isempty(test.distortionModel{1})
@@ -113,7 +113,7 @@ if numel(job.resizedList) > nStart
             for m = 1:numel(test.distortionModel)
                 % divide image into ROIs, run cross-correlation on each
                 % ROI to calculate local xy shifts, output dicOut as structure array
-                dicOut = fRunDIC(imRef,imTest,test.setXCF{min(numel(test.setXCF),m)},test.distortionModel{m});
+                dicOut = fRunDIC(imRef,imTest,test.setXCF(min(numel(test.setXCF),m)),test.distortionModel{m});
 
                 %unpack outputs from dicOut
                 % output is in pixels - convert to length units
@@ -148,7 +148,7 @@ if numel(job.resizedList) > nStart
         % the previous image correlation step
         if fitErr1
             disp(['Residual shifts / pixels between images ' num2str(n+1) ' and ' num2str(n) ' (' test.distortionName ')']);
-            job.shifts{n}{1}.fitError = fRunDIC(imRef,remapImage(test.pos,job.shifts{n}{end},imTest,'test2ref'),test.setXCF{end},'poly11');
+            job.shifts{n}{1}.fitError = fRunDIC(imRef,remapImage(test.pos,job.shifts{n}{end},imTest,'test2ref'),test.setXCF(end),'poly11');
         end
     end %end first for-loop
 end %end if-check for whether or not to skip the first for-loop
@@ -169,10 +169,10 @@ if nStart>1
 
         disp([newline 'Calculating shifts between images ' num2str(n+1) ' and ' num2str(n) ' (' test.distortionName '):']);
         
-        imTest = test.(test.setXCF{1}.xcfImg);
+        imTest = test.(test.setXCF(1).xcfImg);
         % if imRefNew was created at the end of the last loop iteration,
         % read imRef from that
-        if exist('imRefNew','var'), imRef = imRefNew; else, imRef = ref.(ref.setXCF{1}.xcfImg); end; clear imRefNew
+        if exist('imRefNew','var'), imRef = imRefNew; else, imRef = ref.(ref.setXCF(1).xcfImg); end; clear imRefNew
 
         % TODO - put this in a nested function to avoid repeating
         % code lines
@@ -187,7 +187,7 @@ if nStart>1
         else
             for m = 1:numel(test.distortionModel)
                 disp(['Distortion model ' test.distortionModel{m} ':']);
-                dicOut = fRunDIC(imRef,imTest,test.setXCF{min(numel(test.setXCF),m)},test.distortionModel{m});
+                dicOut = fRunDIC(imRef,imTest,test.setXCF(min(numel(test.setXCF),m)),test.distortionModel{m});
 
                 % output is in pixels - convert to length units
                 pix2um = @(dxy,outPix) dxy*outPix;
@@ -221,7 +221,7 @@ if nStart>1
         % residual shifts
         if fitErr1    
             disp(['Residual shifts between images ' num2str(n+1) ' and ' num2str(n) ' (' test.distortionName '):']);
-            job.shifts{n}{1}.fitError = fRunDIC(imRef,remapImage(test.pos,job.shifts{n}{end},imTest,'test2ref'),test.setXCF{end},'poly11');
+            job.shifts{n}{1}.fitError = fRunDIC(imRef,remapImage(test.pos,job.shifts{n}{end},imTest,'test2ref'),test.setXCF(end),'poly11');
         end
 
     end % end second for-loop (working backwards from nStart to 1)

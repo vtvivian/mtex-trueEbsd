@@ -163,7 +163,7 @@ end
 
 %%  Step 3. estimate a sensible cross-correlation ROI size for the common grid
 % this eventually goes into @distortedImg property setXCF.ROISize
-% job.resizedList(n).setXCF{1}.ROISize = roiSizePix
+% job.resizedList(n).setXCF(1).ROISize = roiSizePix
 % each ROI should contain at least ~10 visible boundary segments - 3 grains
 % across
 % but only the central quarter of the ROI is visible because of the
@@ -171,6 +171,7 @@ end
 % guess that a 'typical' EBSD map is maybe 25 grains across, so each ROI
 % should be at least 1/4th of the map width numel(vc{1})
 
+%TODO - MOVE TO pairShifts CLASS PROPERTY
 roiSizePix=2^(ceil(log2(numel(vc{1})/4))); 
 
 %%  Step 4. resample images and edge transforms on common grid 
@@ -282,8 +283,9 @@ for n = 1:numel(job.imgList)
 
     % update ROI size in setXCF (from step 3), except leave reference image as it has no
     % 'next image' to correlate shifts to.
+    %TODO - MOVE TO pairShifts CLASS PROPERTY
     if  n < numel(job.imgList)
-        job.resizedList(n).setXCF{1}.ROISize = roiSizePix;
+        job.resizedList(n).setXCF(1).ROISize = roiSizePix;
     end
 
 end

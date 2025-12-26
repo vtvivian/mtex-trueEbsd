@@ -29,7 +29,7 @@ classdef trueEbsd
         imgList = distortedImg.empty  %cell array of distortedImg objects        
         resizedList = distortedImg.empty %pixel sizes and FOV matched
         undistortedList = distortedImg.empty  %undistorted
-        shifts = {}
+        shifts = pairShifts.empty
     end %properties
 
     methods

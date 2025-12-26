@@ -1,8 +1,8 @@
 function [RegOutput]= fRunDIC(Image_ref,Image_test,setXCF,fitfunc)
 %% Unpack inputs
 ROI.size_pass_1 =setXCF.ROISize;
-numROI = setXCF.NumROI;
-XCF_mesh = setXCF.XCFMesh; % XCF mesh size default value is 250
+% setXCF.NumROI = setXCF.NumROI;
+% setXCF.XCFMesh = setXCF.XCFMesh; % XCF mesh size default value is 250
 
 %% run  main functions
 %set up ROIs
@@ -16,14 +16,18 @@ xmax=max(colvals);
 ymax=max(rowvals);
 boundary = [xmin+1,ymin+1,xmax-xmin-1,ymax-ymin-1]; %[left edge top edge width height], like imcrop.
 [FFTfilter,hfilter] = fFilters(ROI.size_pass_1,Filters_setting);
-% spread out the subregions in the defined ROI and set up the position of ROIs
-[ROI.position_X_pass_1, ROI.position_Y_pass_1,ROI.num_x_pass_1,ROI.num_y_pass_1, ROI.coordinator_pass_1, ROI.num_pass_1] = fDIC_ROI_position(ROI.size_pass_1,numROI,boundary);
+% % MOVE TO ROI CLASS
+% % spread out the subregions in the defined ROI and set up the position of ROIs
+% [ROI.position_X_pass_1, ROI.position_Y_pass_1,ROI.num_x_pass_1,ROI.num_y_pass_1, ROI.coordinator_pass_1, ROI.num_pass_1] = fDIC_ROI_position(ROI.size_pass_1,setXCF.NumROI,boundary);
 
 % perform the XCF and determine shift in x  shift in y and peak height
-[ROI.Shift_X_1,ROI.Shift_Y_1,CCmax_1] = fDIC_xcf_mat_mex(Image_ref,Image_test,ROI,Filters_setting,XCF_mesh,hfilter,FFTfilter);
-% %replace with the next line if fDIC_xcf_mat_mex doesn't work
-% [ROI.Shift_X_1,ROI.Shift_Y_1,CCmax_1] = fDIC_xcf_mat(Image_ref,Image_test,ROI,Filters_setting,XCF_mesh,hfilter,FFTfilter);
-
+try
+    [ROI.Shift_X_1,ROI.Shift_Y_1,CCmax_1] = fDIC_xcf_mat_mex(Image_ref,Image_test,ROI,Filters_setting,setXCF.XCFMesh,hfilter,FFTfilter);
+catch
+    % %replace with the next line if fDIC_xcf_mat_mex doesn't work
+    [ROI.Shift_X_1,ROI.Shift_Y_1,CCmax_1] = fDIC_xcf_mat(Image_ref,Image_test,ROI,Filters_setting,setXCF.XCFMesh,hfilter,FFTfilter);
+    warning('Mex file error in fDIC_xcf_mat_mex. Check the mex file for your operating system. Mex file compiled using MATLAB version 2025a.');
+end
 %% fit a surface to the shift vector
 % figure, imagesc(ROI.Shift_X_1); axis equal; caxis([-15 -5]);
 % figure, imagesc(ROI.Shift_Y_1); axis equal; caxis([-5 5]);

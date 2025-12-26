@@ -64,7 +64,7 @@ classdef distortedImg
     % @struct describing region of interest (ROI) size and spacing for image cross-correlation in calcShifts().
     % - The default values are calculated in pixelSizeMatch()  --
     %     reasonable values for a typical microstructure map, but you can set
-    %     this property yourself in job.resizedList{n}.setXCF.
+    %     this property yourself in job.resizedList(n).setXCF.
     % - Set this after running pixelSizeMatch(job) and before
     %     calcShifts(job), because the ROI are defined in pixel units, so it
     %     should be performed on the re-sized/scaled data.
@@ -111,7 +111,7 @@ classdef distortedImg
 
     properties  %properties related to trueEbsd algorithm
         pos = vector3d % vector3d position of every pixel, computed later in pixelSizeMatch
-        setXCF = {} % settings for image registration, used in calcShifts, defaults computed in constructor function
+        setXCF = struct.empty % settings for image registration, used in calcShifts, defaults computed in constructor function
     end
 
     properties (Dependent=true) %properties we get
@@ -182,7 +182,7 @@ classdef distortedImg
             % % or load a custom one (but ROISize will always be rewritten
             % % when resizing images)
 
-            disImg.setXCF = get_option(varargin,'setXCF',{setXCF},{'cell'});
+            disImg.setXCF = get_option(varargin,'setXCF',setXCF,{'struct'});
             disImg.highContrast = get_option(varargin,'highContrast',0,{'double';'single';'uint8';'uint16';'uint32';'logical'});
             disImg.edgePadWidth = get_option(varargin,'edgePadWidth',1,{'double';'single';'uint8';'uint16';'uint32';'logical'});
 
