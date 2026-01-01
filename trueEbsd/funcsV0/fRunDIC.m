@@ -1,4 +1,4 @@
-function [RegOutput]= fRunDIC(Image_ref,Image_test,setXCF,fitfunc)
+function [RegOutput]= fRunDIC(Image_ref,Image_test,setXCF,fitfunc,dx,dy)
 %% Unpack inputs
 ROI.size_pass_1 =setXCF.ROISize;
 % setXCF.NumROI = setXCF.NumROI;
@@ -16,9 +16,9 @@ xmax=max(colvals);
 ymax=max(rowvals);
 boundary = [xmin+1,ymin+1,xmax-xmin-1,ymax-ymin-1]; %[left edge top edge width height], like imcrop.
 [FFTfilter,hfilter] = fFilters(ROI.size_pass_1,Filters_setting);
-% % MOVE TO ROI CLASS
+% TODO: MOVE TO ROI CLASS
 % % spread out the subregions in the defined ROI and set up the position of ROIs
-% [ROI.position_X_pass_1, ROI.position_Y_pass_1,ROI.num_x_pass_1,ROI.num_y_pass_1, ROI.coordinator_pass_1, ROI.num_pass_1] = fDIC_ROI_position(ROI.size_pass_1,setXCF.NumROI,boundary);
+[ROI.position_X_pass_1, ROI.position_Y_pass_1,ROI.num_x_pass_1,ROI.num_y_pass_1, ROI.coordinator_pass_1, ROI.num_pass_1] = fDIC_ROI_position(ROI.size_pass_1,setXCF.NumROI,boundary);
 
 % perform the XCF and determine shift in x  shift in y and peak height
 try
@@ -240,10 +240,17 @@ disp(['Mean X-shift length ' num2str(mean(abs(ROI.Shift_X_1(:)))) ' pixels']);
 disp(['Mean Y-shift length ' num2str(mean(abs(ROI.Shift_Y_1(:)))) ' pixels']);
 disp(['Mean shift length ' num2str(mean(sqrt(abs(ROI.Shift_X_1(:).^2+abs(ROI.Shift_Y_1(:).^2))))) ' pixels']);
 
-RegOutput.x= xshifts;
-RegOutput.y = yshifts;
-RegOutput.xshiftsROI= xshiftsROI;
-RegOutput.yshiftsROI = yshiftsROI;
-RegOutput.ROI = ROI;
+% convert to lengths
+pix2um = @(dxy,outPix) dxy*outPix;
+% create pairShifts object
+RegOutput = pairShifts(...
+    pix2um(dx,xshifts),   pix2um(dy,yshifts),...
+    pix2um(dx,xshiftsROI),pix2um(dy,yshiftsROI),...
+    ROI);
+% RegOutput.x= xshifts;
+% RegOutput.y = yshifts;
+% RegOutput.xshiftsROI= xshiftsROI;
+% RegOutput.yshiftsROI = yshiftsROI;
+% RegOutput.ROI = ROI;
 
 

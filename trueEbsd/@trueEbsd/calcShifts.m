@@ -1,7 +1,7 @@
 function job = calcShifts(job, varargin)
 % calculate ROI shifts from @trueEbsd variable
 % basically works as a fRunDIC wrapper
-% outputs job.shifts{imgList#}{distortionModel#}.shifts
+% outputs job.shifts{imgList#}(distortionModel#).shifts
 % 
 % Syntax:
 % job = calcShifts(job);
@@ -45,7 +45,7 @@ function job = calcShifts(job, varargin)
 %           e.g. let job.resizedList{1}.distortionName = ‘tilt’;
 %           so job.resizedList{1}.distortionModel = {'projective','poly11','poly22'};
 %           therefore m=3. 
-% 	    job.shifts{n}{m} is a @struct containing these fields:
+% 	    job.shifts{n} is a @pairShifts array containing these fields:
 %       -	x = image x-shifts in μm, after fitting to the distortion model.
 %       2D numeric array same size as image row/columns
 %       -	y = same as x but for y-shifts
@@ -76,7 +76,9 @@ end
 
 % preallocate output array
 job.shifts = cell(1,numel(job.resizedList)-1);
-
+if fitErr1
+    job.fitError=createArray(numel(job.resizedList)-1,1,"pairShifts");
+end
 % decide where to start - nstart = smallest n with a
 % high-contrast image, go to n = max, then go backwards from nstart to
 % n = 1
@@ -101,37 +103,43 @@ if numel(job.resizedList) > nStart
         % read imTest from that
         if exist('imTestNew','var'), imTest = imTestNew; else, imTest = test.(test.setXCF(1).xcfImg); end; clear imTestNew
 
+        % create pairShifts object
+        job.shifts{n} = createArray(numel(test.distortionModel),1,"pairShifts");
+
         % if no distortion (i.e. the distortion name is 'true')
         if isempty(test.distortionModel{1})
             %skip DIC and write zero shifts
             m=1;
             disp(['Mean X-shift length 0 pixels' newline 'Mean Y-shift length 0 pixels'  newline 'Mean shift length 0 pixels']);
-            job.shifts{n}{m}.x = zeros(size(imRef));
-            job.shifts{n}{m}.y = zeros(size(imRef));
+            job.shifts{n}(1) = pairShifts(zeros(size(imRef)),zeros(size(imRef)),[],[],[]);
+            % job.shifts{n}(m).x = zeros(size(imRef));
+            % job.shifts{n}(m).y = zeros(size(imRef));
         else
             %loop and stack shifts from multiple distortion models
             for m = 1:numel(test.distortionModel)
                 % divide image into ROIs, run cross-correlation on each
                 % ROI to calculate local xy shifts, output dicOut as structure array
-                dicOut = fRunDIC(imRef,imTest,test.setXCF(min(numel(test.setXCF),m)),test.distortionModel{m});
+                dicOut = fRunDIC(imRef,imTest,test.setXCF(min(numel(test.setXCF),m)),test.distortionModel{m},test.dx,test.dy);
 
-                %unpack outputs from dicOut
-                % output is in pixels - convert to length units
-                pix2um = @(dxy,outPix) dxy*outPix;
-                job.shifts{n}{m}.x = pix2um(test.dx, dicOut.x);
-                job.shifts{n}{m}.y = pix2um(test.dy, dicOut.y);
-                job.shifts{n}{m}.xshiftsROI = pix2um(test.dx, dicOut.xshiftsROI);
-                job.shifts{n}{m}.yshiftsROI = pix2um(test.dy, dicOut.yshiftsROI);
+                % %unpack outputs from dicOut
+                % % output is in pixels - convert to length units
+                % pix2um = @(dxy,outPix) dxy*outPix;
+                % x = pix2um(test.dx, dicOut.x);
+                % y = pix2um(test.dy, dicOut.y);
+                % xshiftsROI = pix2um(test.dx, dicOut.xshiftsROI);
+                % yshiftsROI = pix2um(test.dy, dicOut.yshiftsROI);
+                % 
+                % % leave ROI outputs in pixels -- mainly used for debugging
+                % ROI = dicOut.ROI;
 
-                % leave ROI outputs in pixels -- mainly used for debugging
-                job.shifts{n}{m}.ROI = dicOut.ROI;
+                job.shifts{n}(m) = pairShifts(dicOut);
           
                 %TODO - figure out how to include fieldnames in anonymous function
                 %to avoid repeated code
 
                 % update imTest to stack distortion models
                 if numel(test.distortionModel)>1 && m<numel(test.distortionModel)
-                    imTest= remapImage(test.pos,job.shifts{n}{m},imTest,'test2ref');
+                    imTest= remapImage(test.pos,job.shifts{n}(m),imTest,'test2ref');
                 end
             end
         end
@@ -140,7 +148,7 @@ if numel(job.resizedList) > nStart
         % values of previous imTest onto imRef, which becomes the next
         % imTest
         if ~ref.highContrast
-            imTestNew = remapImage(test.pos,job.shifts{n}{end},imTest,'test2ref');
+            imTestNew = remapImage(test.pos,job.shifts{n}(end),imTest,'test2ref');
         end
 
         % residual shifts - values calculated and displayed/stored but not used
@@ -148,7 +156,7 @@ if numel(job.resizedList) > nStart
         % the previous image correlation step
         if fitErr1
             disp(['Residual shifts / pixels between images ' num2str(n+1) ' and ' num2str(n) ' (' test.distortionName ')']);
-            job.shifts{n}{1}.fitError = fRunDIC(imRef,remapImage(test.pos,job.shifts{n}{end},imTest,'test2ref'),test.setXCF(end),'poly11');
+            job.fitError(n)= fRunDIC(imRef,remapImage(test.pos,job.shifts{n}(end),imTest,'test2ref'),test.setXCF(end),'poly11',test.dx,test.dy);
         end
     end %end first for-loop
 end %end if-check for whether or not to skip the first for-loop
@@ -182,29 +190,33 @@ if nStart>1
             %skip DIC and write zero shifts
             % m=1;
             disp(['Mean X-shift length 0 pixels' newline 'Mean Y-shift length 0 pixels'  newline 'Mean shift length 0 pixels']);
-            job.shifts{n}{1}.x = zeros(size(imRef));
-            job.shifts{n}{1}.y = zeros(size(imRef));
+            job.shifts{n}(1) = pairShifts(zeros(size(imRef)),zeros(size(imRef)),[],[],[]);
+            % job.shifts{n}{1}.x = zeros(size(imRef));
+            % job.shifts{n}{1}.y = zeros(size(imRef));
         else
             for m = 1:numel(test.distortionModel)
                 disp(['Distortion model ' test.distortionModel{m} ':']);
-                dicOut = fRunDIC(imRef,imTest,test.setXCF(min(numel(test.setXCF),m)),test.distortionModel{m});
-
-                % output is in pixels - convert to length units
-                pix2um = @(dxy,outPix) dxy*outPix;
-                job.shifts{n}{m}.x = pix2um(test.dx, dicOut.x);
-                job.shifts{n}{m}.y = pix2um(test.dy, dicOut.y);
-                job.shifts{n}{m}.xshiftsROI = pix2um(test.dx, dicOut.xshiftsROI);
-                job.shifts{n}{m}.yshiftsROI = pix2um(test.dy, dicOut.yshiftsROI);
-                
-                 % leave ROI outputs in pixels -- mainly used for debugging
-                job.shifts{n}{m}.ROI = dicOut.ROI;
+                dicOut = fRunDIC(imRef,imTest,test.setXCF(min(numel(test.setXCF),m)),test.distortionModel{m},test.dx,test.dy);
+                % 
+                % % output is in pixels - convert to length units
+                % pix2um = @(dxy,outPix) dxy*outPix;
+                % job.shifts{n}{m}.x = pix2um(test.dx, dicOut.x);
+                % job.shifts{n}{m}.y = pix2um(test.dy, dicOut.y);
+                % job.shifts{n}{m}.xshiftsROI = pix2um(test.dx, dicOut.xshiftsROI);
+                % job.shifts{n}{m}.yshiftsROI = pix2um(test.dy, dicOut.yshiftsROI);
+                % 
+                %  % leave ROI outputs in pixels -- mainly used for debugging
+                % job.shifts{n}{m}.ROI = dicOut.ROI;
           
                 %TODO - figure out how to include fieldnames in anonymous function
                 %to avoid repeated code
 
+
+                job.shifts{n}(m) = pairShifts(dicOut);
+
                 % update imTest to stack distortion models
                 if numel(test.distortionModel)>1 && m<numel(test.distortionModel)
-                    imTest= remapImage(test.pos,job.shifts{n}{m},imTest,'test2ref');
+                    imTest= remapImage(test.pos,job.shifts{n}(m),imTest,'test2ref');
                 end
             end
         end
@@ -215,13 +227,13 @@ if nStart>1
         % values of imRef (which should always have high contrast) onto
         % imTest, and make this the next imRef
         if ~test.highContrast
-            imRefNew = remapImage(ref.pos,job.shifts{n}{end},imRef,'ref2test');
+            imRefNew = remapImage(ref.pos,job.shifts{n}(end),imRef,'ref2test');
         end
 
         % residual shifts
         if fitErr1    
             disp(['Residual shifts between images ' num2str(n+1) ' and ' num2str(n) ' (' test.distortionName '):']);
-            job.shifts{n}{1}.fitError = fRunDIC(imRef,remapImage(test.pos,job.shifts{n}{end},imTest,'test2ref'),test.setXCF(end),'poly11');
+            job.fitError(n) = fRunDIC(imRef,remapImage(test.pos,job.shifts{n}(end),imTest,'test2ref'),test.setXCF(end),'poly11',test.dx,test.dy);
         end
 
     end % end second for-loop (working backwards from nStart to 1)
@@ -234,7 +246,7 @@ end  %end if-check for whether or not to skip the second for-loop
         % 
         % Inputs:
         % posGrid = @vector3d array of image pixel positions
-        % shifts = job.shifts{n}{end} @struct containing xy shifts in um
+        % shifts = job.shifts{n}(end) @struct containing xy shifts in um
         % img = r*c*z array, image values
         % shiftdir = 'test2ref' or 'ref2test' - decide which way to do the
         % remapping

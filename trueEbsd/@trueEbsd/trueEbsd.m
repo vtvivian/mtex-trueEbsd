@@ -30,6 +30,7 @@ classdef trueEbsd
         resizedList = distortedImg.empty %pixel sizes and FOV matched
         undistortedList = distortedImg.empty  %undistorted
         shifts = pairShifts.empty
+        fitError = pairShifts.empty
     end %properties
 
     methods

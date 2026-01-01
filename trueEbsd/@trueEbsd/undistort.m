@@ -54,8 +54,8 @@ for n=numel(job.resizedList):-1:1
         % yTrue = yTrue;
     else
         for m = 1:numel(job.shifts{n})
-            xTrue = xTrue + job.shifts{n}{m}.x;
-            yTrue = yTrue + job.shifts{n}{m}.y;
+            xTrue = xTrue + job.shifts{n}(m).x;
+            yTrue = yTrue + job.shifts{n}(m).y;
         end
     end
     %% create scattered interpolant function and resample on original image grid
