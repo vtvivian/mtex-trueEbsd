@@ -1,4 +1,3 @@
-
 function [Shift_X,Shift_Y,CCmax] = fDIC_xcf_mat(Image_ref,Image_test,ROI,Filters_setting,XCF_mesh,hfilter,FFTfilter)
 % cross correlation is performed and shift X, shift Y and peak height are
 % determined.

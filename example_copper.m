@@ -10,7 +10,7 @@
 % Description:  
 % Example script to run trueEBSD workflow and postprocessing to
 % characterise grain boundary voids in a copper polycrystal.
-% MATLAB R2024a and mtex version forked from feature/grain3d, approx mtex6.0.beta3
+% MATLAB R2025a and mtex version 6.1.0 (vtfork - commit 665cc141)
 %
 % Inputs:  
 % copper29.h5oina
@@ -25,12 +25,53 @@
 
 clear; close all; home;
 
-% TrueEBSD version ID 
-vId = '20240916 / app version 1.2.1';
+%% Add trueEBSD and MTEX MATLAB paths 
+% startup local MTEX (replace this with local path)
+mtexPath = "/home/rock/Documents/Git-projects/mtex";
+cd(mtexPath);
+startup_mtex; %variables get cleared after this step so you need to recreate mpath
+mtexPath = "/home/rock/Documents/Git-projects/mtex";
 
-%% Add trueEBSD related MATLAB paths 
-addpath(genpath(cd));
 
+trueEbsdPath = cd;
+addpath(genpath(trueEbsdPath));
+
+%% Import data + file saving
+tic
+%replace the next line with local data storage path
+dataPath = '/media/Files/RockShare/Work/Projects/2025_trueEbsdMtex_paper/demodata_copper';
+cd(dataPath); %return to starting folder
+
+% Construct distortedImg list and set up trueEBSD job
+dataName = 'trueEbsdCopper';
+% file saving housekeeping
+setSave = 1;
+timestamp = char(datetime('now'),'yyMMdd_HHmm');
+savepname = fullfile(dataPath, [dataName '_' timestamp]);
+
+if setSave
+    if ~exist (savepname, 'dir')
+        mkdir(savepname);
+    end
+    diary(fullfile(savepname,[dataName '.log']));
+    diary on
+end
+
+% TrueEBSD and MTEX version IDs
+% version ID as git hash in mtex-trueEbsd repo
+% vId can be a number or char array
+try vId_trueEbsd = githash('.',trueEbsdPath); catch, vId_trueEbsd = '0'; end
+try vId_mtex = githash('.',mtexPath); catch, vId_mtex = '0'; end
+
+disp(['Starting trueEBSD job for ' dataName ': ']);
+disp(['TrueEBSD Git version ' vId_trueEbsd '. ']);
+disp(['MTEX Git version ' vId_mtex '. ']);
+
+if setSave
+    disp(['Outputs will be saved to ' savepname '/. ']);
+else
+    disp(['Outputs will not be saved. ']);
+end
 %% Data Import
 % Begin by loading the EBSD map and associated SEM images from the Oxford
 % Instruments *.h5oina file.
@@ -81,22 +122,18 @@ bse1b = medfilt2(bse1,[3 3],'symmetric');
 
 
 %% Set up TrueEBSD job
-% @distortedImg imgList{n} is a TrueEBSD class containing information 
+% @distortedImg imgList(n) is a TrueEBSD class containing information 
 % about an image or EBSD map and its distortion type relative to the next
 % [(n+1)th] image in the sequence.
 % The final reference image bse1b has very low grain boundary contrast,
 % so we set the 'highContrast' flag to 0.
 
-
-% Construct distortedImg list and set up trueEBSD job
-dataName = 'trueEbsdCopper';
-
 % Construct @distortedImg imgList{:} 
-imgList=cell(1,4);
-imgList{1} = distortedImg('bc','drift-shift', ebsd, 'mapPlottingConvention', ebsd.plottingConvention, 'highContrast',1,'edgePadWidth',3);
-imgList{2} = distortedImg(fsd1a,'tilt', 'dxy', double(ebsd.opt.Images.Header.X_Step), 'highContrast',1,'edgePadWidth',3); % 
-imgList{3} = distortedImg(bse1a,'true', 'dxy', double(ebsd.opt.Images.Header.X_Step), 'highContrast',1,'edgePadWidth',3); % 
-imgList{4} = distortedImg(bse1b,'true', 'dxy', double(ebsd.opt.Images.Header.X_Step), 'highContrast',0,'edgePadWidth',1); % BSE but with pores only
+imgList=createArray(4,1,'distortedImg');
+imgList(1) = distortedImg('bc','drift-shift', ebsd, 'mapPlottingConvention', ebsd.plottingConvention, 'highContrast',1,'edgePadWidth',3);
+imgList(2) = distortedImg(fsd1a,'tilt', 'dxy', double(ebsd.opt.Images.Header.X_Step), 'highContrast',1,'edgePadWidth',3); % 
+imgList(3) = distortedImg(bse1a,'true', 'dxy', double(ebsd.opt.Images.Header.X_Step), 'highContrast',1,'edgePadWidth',3); % 
+imgList(4) = distortedImg(bse1b,'true', 'dxy', double(ebsd.opt.Images.Header.X_Step), 'highContrast',0,'edgePadWidth',1); % BSE but with pores only
 
 %%
 % job is a |@trueEbsd| object containing a sequence of |@distortedImg|
@@ -104,7 +141,7 @@ imgList{4} = distortedImg(bse1b,'true', 'dxy', double(ebsd.opt.Images.Header.X_S
 %
 % The starting data for the TrueEBSD workflow are stored in |job.imgList|.
 
-job = trueEbsd(imgList{:});
+job = trueEbsd(imgList);
 
 %%%
 % Plot as-imported image sequence to check they are all of similar regions
@@ -115,12 +152,13 @@ t=tiledlayout('flow','TileSpacing','tight','Padding','tight');
 title(t,'TrueEBSD starting image sequence');
 for n=1:numel(imgList)
     nexttile; 
-    imagesc('XData',imgList{n}.dx.*(1:size(imgList{n}.img,2)),...
-        'YData',imgList{n}.dy*(1:size(imgList{n}.img,1)),...
-        'CData',imgList{n}.img);
+    imagesc('XData',imgList(n).dx.*(1:size(imgList(n).img,2)),...
+        'YData',imgList(n).dy*(1:size(imgList(n).img,1)),...
+        'CData',imgList(n).img);
     colormap gray; axis image on ij;
 end
 linkaxes;
+if setSave, saveFigs(gcf,[dataName '_figs.pdf'],savepname); close; end
 
 t1  = toc;
 disp(['Finished set up trueEBSD job for ' dataName ' in ' num2str(t1,'%.1f') ' seconds']);
@@ -153,7 +191,7 @@ disp(['Finished resize images to match pixel size and FOV for ' dataName ' in ' 
 %
 % Images 4 and 3 are the same SEM image filtered using two methods, so there 
 % is no distortion between them -- we had set this up in the input data as 
-% |job.imgList{1}.distortionName = 'true'|. In this case, TrueEBSD assumes 
+% |job.imgList(1).distortionName = 'true'|. In this case, TrueEBSD assumes 
 % that all the shifts between this image pair are zero and does not
 % compute them from ROI cross-correlation.
 %
@@ -170,12 +208,13 @@ t=tiledlayout('flow','TileSpacing','tight','Padding','tight');
 title(t,'TrueEBSD image sequence for cross-correlation');
 for n=1:numel(job.resizedList)
     nexttile; 
-    imagesc('XData',job.resizedList{n}.dx.*(1:size(job.resizedList{n}.img,2)),...
-        'YData',job.resizedList{n}.dy*(1:size(job.resizedList{n}.img,1)),...
-        'CData',job.resizedList{n}.(job.resizedList{n}.setXCF{1}.xcfImg));
+    imagesc('XData',job.resizedList(n).dx.*(1:size(job.resizedList(n).img,2)),...
+        'YData',job.resizedList(n).dy*(1:size(job.resizedList(n).img,1)),...
+        'CData',job.resizedList(n).(job.resizedList(n).setXCF(1).xcfImg));
     colormap gray; axis image on ij;
 end
 linkaxes;
+if setSave, saveFigs(gcf,[dataName '_figs.pdf'],savepname); close; end
 
 %%% Compute image shifts
 
@@ -205,12 +244,13 @@ t=tiledlayout('flow','TileSpacing','tight','Padding','tight');
 title(t,'TrueEBSD image sequence after alignment');
 for n=1:numel(job.undistortedList)
     nexttile; 
-    imagesc('XData',job.undistortedList{n}.dx.*(1:size(job.undistortedList{n}.img,2)),...
-        'YData',job.undistortedList{n}.dy*(1:size(job.undistortedList{n}.img,1)),...
-        'CData',job.undistortedList{n}.img);
+    imagesc('XData',job.undistortedList(n).dx.*(1:size(job.undistortedList(n).img,2)),...
+        'YData',job.undistortedList(n).dy*(1:size(job.undistortedList(n).img,1)),...
+        'CData',job.undistortedList(n).img);
     colormap gray; axis image on ij;
 end
 linkaxes;
+if setSave, saveFigs(gcf,[dataName '_figs.pdf'],savepname); close; end
 
 t1  = toc;
 disp(['Finished remove image distortions for ' dataName ' in ' num2str(t1,'%.1f') ' seconds']);
@@ -226,14 +266,14 @@ disp(['Finished remove image distortions for ' dataName ' in ' num2str(t1,'%.1f'
 
 figure;
 nextAxis;
-plot(job.undistortedList{1}.ebsd('indexed'), job.undistortedList{1}.ebsd('indexed').orientations, ...
-    job.undistortedList{1}.ebsd.plottingConvention,'coordinates','on');
+plot(job.undistortedList(1).ebsd('indexed'), job.undistortedList(1).ebsd('indexed').orientations, ...
+    job.undistortedList(1).ebsd.plottingConvention,'coordinates','on');
 title('Undistorted MTEX EBSD map (Copper IPF-out of screen)','Color','k');
 for n=1:numel(job.undistortedList)
     nextAxis;
-    plot(job.undistortedList{1}.ebsd, ...
-        ij2EbsdSquare(job.undistortedList{1}.ebsd,job.undistortedList{n}.img), ...
-        job.undistortedList{1}.ebsd.plottingConvention,'coordinates','on');
+    plot(job.undistortedList(1).ebsd, ...
+        ij2EbsdSquare(job.undistortedList(1).ebsd,job.undistortedList(n).img), ...
+        job.undistortedList(1).ebsd.plottingConvention,'coordinates','on');
     mtexColorMap gray;
     title(['Undistorted MTEX image ' num2str(n)],'Color','k');
 end
@@ -253,16 +293,16 @@ disp('Continuing onto grain boundary voids analysis.');
 %%
 % First we extract EBSD map and BSE image with voids contrast from the
 % TrueEBSD processed data.
-ebsd = job.undistortedList{1}.ebsd;
-bse = job.undistortedList{4}.img; 
+ebsd = job.undistortedList(1).ebsd;
+bse = job.undistortedList(4).img; 
 
 %%%
 % We need to crop both the EBSD map and BSE image to the largest rectangle that 
 % contains the EBSD map information. 
-[~,~,~,keepGrid] = FindLargestRectangles(~isnan(job.undistortedList{1}.img));
+[~,~,~,keepGrid] = FindLargestRectangles(~isnan(job.undistortedList(1).img));
 ebsd = gridify(ebsd(ij2EbsdSquare(ebsd,keepGrid)));
 % ebsd forgets its plottingConvention after gridify so we remind it here
-ebsd.plottingConvention = job.undistortedList{1}.mapPlottingConvention; 
+ebsd.plottingConvention = job.undistortedList(1).mapPlottingConvention; 
 %repeat for binarised reference image
 bse = reshape(bse(keepGrid),size(ebsd));
 
@@ -275,7 +315,7 @@ voidPhase = crystalSymmetry('1','mineral','voids','color',str2rgb('DarkBlue'));
 ebsd(phasesBse).rotations = rotation('euler',0,0,0);
 ebsd(phasesBse).CS = voidPhase;
 ebsd = gridify(ebsd);
-ebsd.plottingConvention = job.undistortedList{1}.mapPlottingConvention; 
+ebsd.plottingConvention = job.undistortedList(1).mapPlottingConvention; 
 
 display(ebsd);
 
@@ -290,10 +330,10 @@ display(grainsVoids('voids'));
 figure; histogram(grainsVoids('voids'),grainsVoids('voids').area);
 xlabel('void area ({\mu}m^2)');
 figure; 
-histogram(grainsVoids('voids'),grainsVoids('voids').grainSize,50);
+histogram(grainsVoids('voids'),grainsVoids('voids').numPixel,50);
 xlabel('void area (pixels)'); 
 set(gca,'InnerPosition',[66.6000   65.0000  484.4000  335.5000]);
-
+if setSave, saveFigs(gcf,[dataName '_figs.pdf'],savepname); close; end
 
 %% Calculate copper grains and boundaries
 % When we reconstruct copper grains, we select the copper phase only 
@@ -338,6 +378,7 @@ plot(gBs,ebsd.plottingConvention,'linewidth',1,'linecolor','g');
 plot(tPGbs,ebsd.plottingConvention,'linewidth',2,'linecolor','m');
 plot(ebsd('voids'),zeros(size(ebsd('voids'))),ebsd.plottingConvention);
 mtexTitle('Copper Orientations (IPF-out of screen), Grain Boundaries and Voids');
+if setSave, saveFigs(gcf,[dataName '_figs.pdf'],savepname); close; end
 
 %% Find nearest g.b. per copper void
 % We want to find out whether certain grain boundaries or triple junctions
@@ -375,6 +416,7 @@ nextAxis;
 plot(ebsdCopper,tpPosMap,ebsdCopper.plottingConvention); colormap gray; hold on; mtexColorbar;
 plot(gBs,ebsdCopper.plottingConvention,'lineColor','g');
 plot(tPGbs,ebsdCopper.plottingConvention,'lineColor','m','lineWidth',1);
+if setSave, saveFigs(gcf,[dataName '_figs.pdf'],savepname); close; end
 
 %%
 % Now we can find the gb and tp nearest to each void pixel
@@ -403,6 +445,7 @@ plot(tPGbs,'lineColor','m','lineWidth',1);
 nextAxis;
 plot(ebsdCopper,tpNearest); colormap gray; hold on; mtexColorbar;
 plot(tPGbs,'lineColor','m','lineWidth',1);
+if setSave, saveFigs(gcf,[dataName '_figs.pdf'],savepname); close; end
 
 %% 2. Construct an EBSD map |voidsMapGb| showing the locations of all voids,
 % where void pixels = nearest gbId and not-voids = nan. 
@@ -446,6 +489,7 @@ plot(tPGbs(voidsListtp),'lineColor','m','lineWidth',1);
 nextAxis;
 plot(ebsdCopper,voidsDisttp); colormap gray; hold on; mtexColorbar;
 plot(tPGbs(voidsListtp),'lineColor','m','lineWidth',1);
+if setSave, saveFigs(gcf,[dataName '_figs.pdf'],savepname); close; end
 
 
 %%
@@ -456,9 +500,9 @@ plot(tPGbs(voidsListtp),'lineColor','m','lineWidth',1);
 % threshold value by summing the TrueEBSD fit residuals (95th
 % percentile).
 
-voidsList_threshPix = prctile(sqrt(job.shifts{1}{1}.fitError.ROI.Shift_X_1.^2 + job.shifts{1}{1}.fitError.ROI.Shift_Y_1.^2),95)...
-                    + prctile(sqrt(job.shifts{2}{1}.fitError.ROI.Shift_X_1.^2 + job.shifts{2}{1}.fitError.ROI.Shift_Y_1.^2),95) ...
-                    + prctile(sqrt(job.shifts{3}{1}.fitError.ROI.Shift_X_1.^2 + job.shifts{3}{1}.fitError.ROI.Shift_Y_1.^2),95); 
+voidsList_threshPix = prctile(sqrt(job.fitError(1).ROI.Shift_X_1.^2 + job.fitError(1).ROI.Shift_Y_1.^2),95)...
+                    + prctile(sqrt(job.fitError(2).ROI.Shift_X_1.^2 + job.fitError(2).ROI.Shift_Y_1.^2),95) ...
+                    + prctile(sqrt(job.fitError(3).ROI.Shift_X_1.^2 + job.fitError(3).ROI.Shift_Y_1.^2),95); 
 disp(['Threshold distance from g.b. (pixels): ' num2str(voidsList_threshPix)]);
 
 %split |voidsList| into gb segments on, near, and far from a void
@@ -531,6 +575,7 @@ plot(gBs(voidsListGb_on),ebsd.plottingConvention,'linecolor','g','linewidth',2);
 plot(gBs(voidsListGb_near),ebsd.plottingConvention,'linecolor',str2rgb('DarkGreen'),'linewidth',2);
 plot(tPGbs(voidsListTp_on),ebsd.plottingConvention,'linecolor','m','linewidth',3);
 plot(tPGbs(voidsListTp_near),ebsd.plottingConvention,'linecolor',str2rgb('DarkRed'),'linewidth',3);
+if setSave, saveFigs(gcf,[dataName '_figs.pdf'],savepname); close; end
 
 %% Plot misorientation distributions 
 % The next two plot shows that the grain boundaries with around 60 degrees
@@ -549,6 +594,7 @@ plotAngleDistribution(ebsd('Copper').CS,ebsd('Copper').CS,'antipodal','DisplayNa
 legend('show','Location','northwest'); 
 xlabel('Misorientation angle / degrees');
 ylabel('Frequency / mrd');
+if setSave, saveFigs(gcf,[dataName '_figs.pdf'],savepname); close; end
 
 figure; newMtexFigure('layout',[2,2],'figSize','large','outerplotspacing',30,'innerplotspacing',50);
 nextAxis(1,1); plotAxisDistribution(mdf_all,'colorRange','equal'); mtexTitle('All GBs');
@@ -556,13 +602,29 @@ nextAxis(1,2); plotAxisDistribution(mdf_voidsGb,'colorRange','equal'); mtexTitle
 nextAxis(2,1); plotAxisDistribution(mdf_voidsTp,'colorRange','equal'); mtexTitle('Void TPs');
 nextAxis(2,2); plotAxisDistribution(ebsd('Copper').CS,ebsd('Copper').CS,'antipodal','colorRange','equal'); mtexTitle('Uniform MDF');
 mtexColorbar;
-
+if setSave, saveFigs(gcf,[dataName '_figs.pdf'],savepname); close; end
 
 %%
 % This is the end of the grain boundary voids analysis. 
 t1  = toc;
 disp(['Finished grain boundary voids analysis for ' dataName ' in ' num2str(t1,'%.1f') ' seconds.']);
 
-save('example_copper_out.mat',"-v7.3");
-
+if setSave
+    % Save all data if required
+    save(fullfile(savepname,[dataName '_out.mat']),"-v7.3");
+    t1  = toc;
+    disp(['Finished saving MAT file in ' num2str(t1,'%.1f') ' seconds.']);
+    
+    % Save all remaining open figures
+    figHandles = findobj('Type','figure');
+    %sort figures in creation order
+    [~,ix]=sort([figHandles.Number],'ascend');
+    % Loop through figures 2:end
+    for n = 1:numel(figHandles)
+        saveFigs(figHandles(ix(n)),[dataName '_figs.pdf'],savepname); close;
+    end
+    t1 = toc;
+    disp(['Finished saving figures as pdf in ' num2str(t1,'%.1f') ' seconds.']);
+end
 disp('Script ends here.');
+diary off;

@@ -33,8 +33,7 @@ function job = pixelSizeMatch(job, varargin)
 %
 
 % default params
-temp = [job.imgList{:}];
-pixelsize = min([temp.dx]);
+pixelsize = min([job.imgList.dx]);
 offsetMatch = 'centre'; %default
 extentMatch = 'largest'; %default
 if nargin>1
@@ -43,7 +42,7 @@ if nargin>1
     extentMatch = get_option(varargin,'extentMatch',extentMatch,{'char'});
 end
 if ~(pixelsize>0) %0 or nan    
-    pixelsize = min([temp.dx]);
+    pixelsize = min([job.imgList.dx]);
     warning(['using default pixel size of ' num2str(pixelsize) ' um, minimum from imgList']);
 end
 
@@ -59,8 +58,8 @@ v=cell(numel(job.imgList),1); %xyz pixel position vectors
 
 %% Step 1. calculate original pixel position grids and  set up interpolants
 % main outputs in this section:
-% intpi{n} = griddedInterpolant object describing xyz pixel positions for image job.imgList{n}.img
-% v{n} = grid vectors defining pixel positions of job.resizedList{n}.img
+% intpi{n} = griddedInterpolant object describing xyz pixel positions for image job.imgList(n).img
+% v{n} = grid vectors defining pixel positions of job.resizedList(n).img
 % v{1} = 1*r numeric vector containing row(Y) positions
 % v{2} = 1*c numeric vector containing col(X) positions 
 % v{3} = [1:z] for z image (colour) channels
@@ -69,16 +68,16 @@ v=cell(numel(job.imgList),1); %xyz pixel position vectors
 
 for n = 1:numel(job.imgList) %loop through all images in workflow
     %old pixel size
-    pxn=job.imgList{n}.dx;
+    pxn=job.imgList(n).dx;
 
     %preallocate variables
-    v{n} = cell(1,ndims(job.imgList{n}.img)); % cell array to hold xy pixel position lists for each image
+    v{n} = cell(1,ndims(job.imgList(n).img)); % cell array to hold xy pixel position lists for each image
     g=v{n};
-    for nd = 1:ndims(job.imgList{n}.img)
+    for nd = 1:ndims(job.imgList(n).img)
         if nd<3
             %create xy vector
             %initialise as [0,0] = centre of top left pixel
-            v{n}{nd} = pxn*(0:size(job.imgList{n}.img,nd)-1);
+            v{n}{nd} = pxn*(0:size(job.imgList(n).img,nd)-1);
             % handle offset between images in job.imgList{:}
             switch offsetMatch
                 case 'centre'
@@ -93,14 +92,14 @@ for n = 1:numel(job.imgList) %loop through all images in workflow
             %handle 3rd image as colour channels (pixel depth = 1 and don't
             %match anything) -- but don't assume it's always RGB 3
             %channels - e.g. forescatter images have 5 channels
-            v{n}{nd} = 1:size(job.imgList{n}.img,nd);
+            v{n}{nd} = 1:size(job.imgList(n).img,nd);
         end
     end
     [g{:}] = ndgrid(v{n}{:}); % pixel positions
-    job.imgList{n}.pos = vector3d(g{2}(:,:,1),g{1}(:,:,1),zeros(size(g{1}(:,:,1))));
+    job.imgList(n).pos = vector3d(g{2}(:,:,1),g{1}(:,:,1),zeros(size(g{1}(:,:,1))));
     % intp = interpolant function
     % intpi = interpolant for image
-    intpi{n}=griddedInterpolant(g{:},job.imgList{n}.img,'linear','none');
+    intpi{n}=griddedInterpolant(g{:},job.imgList(n).img,'linear','none');
 
     % calculate exent of common pixel position grid
     for nd2=1:2 %only do this for xy coordinates
@@ -121,7 +120,7 @@ end
 % vc{2} = 1*c numeric vector containing col(X) positions 
 % uses ndgrid convention in MATLAB (so [r,c] not [x,y])
 % colour channels are left unchanged so numel(vc) = 2
-% eventually goes into job.resizedList{n}.pos (via gn{:} - defined in Step 4)
+% eventually goes into job.resizedList(n).pos (via gn{:} - defined in Step 4)
 % 
 
 %1. first figure out how many pixels you need
@@ -164,7 +163,7 @@ end
 
 %%  Step 3. estimate a sensible cross-correlation ROI size for the common grid
 % this eventually goes into @distortedImg property setXCF.ROISize
-% job.resizedList{n}.setXCF{1}.ROISize = roiSizePix
+% job.resizedList(n).setXCF(1).ROISize = roiSizePix
 % each ROI should contain at least ~10 visible boundary segments - 3 grains
 % across
 % but only the central quarter of the ROI is visible because of the
@@ -172,14 +171,15 @@ end
 % guess that a 'typical' EBSD map is maybe 25 grains across, so each ROI
 % should be at least 1/4th of the map width numel(vc{1})
 
+%TODO - MOVE TO pairShifts CLASS PROPERTY
 roiSizePix=2^(ceil(log2(numel(vc{1})/4))); 
 
 %%  Step 4. resample images and edge transforms on common grid 
 % Main inputs in this section:
 % intpi{n} = griddedInterpolant object describing image values
-%   for image job.imgList{n}.img from Step 1
+%   for image job.imgList(n).img from Step 1
 % v{n} = original (old) image grid position vectors for each image in 
-%   job.imgList{n} from Step 1
+%   job.imgList(n) from Step 1
 % vc = common (new) image grid row-col position vectors for all images in 
 %   job.resizedList{:} from Step 2
 %
@@ -189,17 +189,17 @@ roiSizePix=2^(ceil(log2(numel(vc{1})/4)));
 % gn{:} = the same information as vn{n} but formatted as ndgrid
 
 % Main outputs in this section:
-% job.resizedList{n}.img = image values resampled on the common pixel position 
+% job.resizedList(n).img = image values resampled on the common pixel position 
 %   grid gn{:} using intpi{n} griddedInterpolant 
-% job.resizedList{n}.pos = @vector3d of pixel positions from gn{:}
-% job.resizedList{n}.ebsd = (if it exists) @EBSD where ebsd.id is resampled
+% job.resizedList(n).pos = @vector3d of pixel positions from gn{:}
+% job.resizedList(n).ebsd = (if it exists) @EBSD where ebsd.id is resampled
 % on the common pixel position grid gn{:} using intpi{n}
 % griddedInterpolant using nearest neighbour interpolation (i.e.
 % orientations are not actually interpolated)
 
 
 % write outputs to job.resizedList
-%initialise job.resizedList{n} as copy of job.imgList{n}
+%initialise job.resizedList(n) as copy of job.imgList(n)
 job.resizedList = job.imgList;
 for n = 1:numel(job.imgList)
 
@@ -209,31 +209,31 @@ for n = 1:numel(job.imgList)
     [gn{:}] = ndgrid(vn{:}); %new grid
 
     % resample image values on new grid
-    job.resizedList{n}.img = intpi{n}(gn{:});    
-    job.resizedList{n}.dx = pixelsize;
-    job.resizedList{n}.dy = pixelsize;
-    job.resizedList{n}.pos = vector3d(gn{2}(:,:,1),gn{1}(:,:,1),zeros(size(gn{1}(:,:,1))));
+    job.resizedList(n).img = intpi{n}(gn{:});    
+    job.resizedList(n).dx = pixelsize;
+    job.resizedList(n).dy = pixelsize;
+    job.resizedList(n).pos = vector3d(gn{2}(:,:,1),gn{1}(:,:,1),zeros(size(gn{1}(:,:,1))));
      
 
     % handle ebsd variables too
-    if ~isempty(job.resizedList{n}.ebsd)
+    if ~isempty(job.resizedList(n).ebsd)
         %construct new EBSD position vectors
         % use function tools/ij2EbsdSquare to handle conversion between ij indexing
         % positions (MATLAB convention) and EBSD xyz positions (convention
         % depends on system)
-        [posEbsdX, posEbsdY] = nwse2EbsdPos(job.imgList{n}.ebsd,job.resizedList{n}.pos.x, job.resizedList{n}.pos.y);
-        posEbsdX=ij2EbsdSquare(job.imgList{n}.ebsd, posEbsdX);
-        posEbsdY=ij2EbsdSquare(job.imgList{n}.ebsd, posEbsdY);
+        [posEbsdX, posEbsdY] = nwse2EbsdPos(job.imgList(n).ebsd,job.resizedList(n).pos.x, job.resizedList(n).pos.y);
+        posEbsdX=ij2EbsdSquare(job.imgList(n).ebsd, posEbsdX);
+        posEbsdY=ij2EbsdSquare(job.imgList(n).ebsd, posEbsdY);
         
 
         %transform image ij coordinates back into ebsd.pos xyz convention
         % function tools/ebsdSquare2ij is the reverse of ij2EbsdSquare 
         % find the nearest ebsd point on sampled grid
-        intpi{n}.Values = ebsdSquare2ij(job.imgList{n}.ebsd, 'id');
+        intpi{n}.Values = ebsdSquare2ij(job.imgList(n).ebsd, 'id');
         intpi{n}.Method = 'nearest';
         % resample EBSD map on the original common sampling grid
         %remember to convert back into EBSDSquare indexing!
-        ebsdNewId = ij2EbsdSquare(job.imgList{n}.ebsd, intpi{n}(gn{1}(:,:,1),gn{2}(:,:,1)));
+        ebsdNewId = ij2EbsdSquare(job.imgList(n).ebsd, intpi{n}(gn{1}(:,:,1),gn{2}(:,:,1)));
         %remove nan and zeros (only positive integers)
         ix = ~isnan(ebsdNewId) & ebsdNewId>0;
 
@@ -246,29 +246,29 @@ for n = 1:numel(job.imgList)
         %create EBSD fields with just 0 values, then repopulate
         %with the correct fields
         ebsdMap0 = zeros(size(ebsdNewId)); %zeros matrix
-        prop1 = job.imgList{n}.ebsd.prop; %struct containing map props
+        prop1 = job.imgList(n).ebsd.prop; %struct containing map props
         for fn = fieldnames(prop1)'
             prop1.(char(fn))= ebsdMap0;
-            prop1.(char(fn))(ix)= job.imgList{n}.ebsd(ebsdNewId(ix)).prop.(char(fn));
+            prop1.(char(fn))(ix)= job.imgList(n).ebsd(ebsdNewId(ix)).prop.(char(fn));
         end
         rot1 = rotation.nan(size(ebsdMap0));
-        rot1(ix) = job.imgList{n}.ebsd(ebsdNewId(ix)).rotations;
+        rot1(ix) = job.imgList(n).ebsd(ebsdNewId(ix)).rotations;
         phase1 = ebsdMap0;
-        phase1(ix) = job.imgList{n}.ebsd(ebsdNewId(ix)).phase;
+        phase1(ix) = job.imgList(n).ebsd(ebsdNewId(ix)).phase;
         % recreate EBSD object
         ebsd1 = EBSD(vector3d(posEbsdX, posEbsdY,ebsdMap0), rot1, phase1, ...
-            job.resizedList{n}.ebsd.CSList, prop1);
-        ebsd1.plottingConvention = job.imgList{n}.mapPlottingConvention;
+            job.resizedList(n).ebsd.CSList, prop1);
+        ebsd1.plottingConvention = job.imgList(n).mapPlottingConvention;
 
         % write to output
-        job.resizedList{n}.ebsd = gridify(ebsd1);
+        job.resizedList(n).ebsd = gridify(ebsd1);
         % plottingConvention isn't passed on automatically in gridify so reassign this
-        job.resizedList{n}.ebsd.plottingConvention = job.imgList{n}.mapPlottingConvention;
+        job.resizedList(n).ebsd.plottingConvention = job.imgList(n).mapPlottingConvention;
 
         %NOTE: don't try to use @EBSDsquare/interp because it only handles indexed EBSD
         %points when interpolating the map, this leads to e.g. ebsd.bc disappearing from unindexed
         %points
-        % this will not work: job.resizedList{n}.ebsd = gridify(interp(job.resizedList{n}.ebsd,ebsdPosX, ebsdPosY));
+        % this will not work: job.resizedList(n).ebsd = gridify(interp(job.resizedList(n).ebsd,ebsdPosX, ebsdPosY));
 
 
         % translate ebsd object to match map image offset
@@ -278,13 +278,14 @@ for n = 1:numel(job.imgList)
         % directions
         % offsetPos(1) = row shift, i.e. south
         % offsetPos(2) = column shift. i.e. east
-        job.resizedList{n}.ebsd = ebsdMapOffset(job.resizedList{n}.ebsd,offsetPos(2),offsetPos(1));
+        job.resizedList(n).ebsd = ebsdMapOffset(job.resizedList(n).ebsd,offsetPos(2),offsetPos(1));
     end
 
     % update ROI size in setXCF (from step 3), except leave reference image as it has no
     % 'next image' to correlate shifts to.
+    %TODO - MOVE TO pairShifts CLASS PROPERTY
     if  n < numel(job.imgList)
-        job.resizedList{n}.setXCF{1}.ROISize = roiSizePix;
+        job.resizedList(n).setXCF(1).ROISize = roiSizePix;
     end
 
 end
