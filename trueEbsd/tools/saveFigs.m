@@ -14,7 +14,14 @@ saveLoc = fullfile(pName,imName);
 
 try figHandle.Color = 'w'; end %sometimes doesn't work with mtex figures, not dealbreaker
 
-export_fig(append(char(saveLoc), '.png'),'-dpng','-r300','-a1',varargin{:},figHandle);
+% export_fig(append(char(saveLoc), '.png'),'-dpng','-r300','-a1',varargin{:},figHandle);
 % savefig(figHandle,saveLoc);
+
+%save into single pdf
+if isfile(saveLoc)
+    export_fig(saveLoc, '-pdf','-r300','-a1','-append','-transparent', figHandle);
+else
+    export_fig(saveLoc, '-pdf','-r300','-a1','-transparent', figHandle);
+end
 
 
