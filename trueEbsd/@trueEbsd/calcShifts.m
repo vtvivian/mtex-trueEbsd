@@ -49,11 +49,11 @@ function job = calcShifts(job, varargin)
 %       -	x = image x-shifts in μm, after fitting to the distortion model.
 %       2D numeric array same size as image row/columns
 %       -	y = same as x but for y-shifts
-%       -	xshiftsROI = image x-shifts in μm, as-measured from ROI cross-correlation. 
+%       -	xShiftsFit = image x-shifts in μm, as-measured from ROI cross-correlation. 
 %           Numeric array or vector same number of elements as number of ROI in image.
 %           If the ROI are positioned in a regular 2D grid, then this output is an array,
 %           otherwise it is a vector.
-%       -	yshiftsROI = same as xshiftsROI but for y-shifts.
+%       -	yShiftsFit = same as xShiftsFit but for y-shifts.
 %       -	ROI = another structure containing information about the ROI
 %               size and spacing. This is only used internally by fRunDIC() and the
 %               functions that it calls in funcsV0, so we don’t describe it fully
@@ -111,7 +111,8 @@ if numel(job.resizedList) > nStart
             %skip DIC and write zero shifts
             m=1;
             disp(['Mean X-shift length 0 pixels' newline 'Mean Y-shift length 0 pixels'  newline 'Mean shift length 0 pixels']);
-            job.shifts{n}(1) = pairShifts(zeros(size(imRef)),zeros(size(imRef)),[],[],[]);
+            job.shifts{n}(1) = pairShifts(zeros(size(imRef)),zeros(size(imRef)),[],[],...
+                [],[],[],[],[]);
             % job.shifts{n}(m).x = zeros(size(imRef));
             % job.shifts{n}(m).y = zeros(size(imRef));
         else
@@ -126,8 +127,8 @@ if numel(job.resizedList) > nStart
                 % pix2um = @(dxy,outPix) dxy*outPix;
                 % x = pix2um(test.dx, dicOut.x);
                 % y = pix2um(test.dy, dicOut.y);
-                % xshiftsROI = pix2um(test.dx, dicOut.xshiftsROI);
-                % yshiftsROI = pix2um(test.dy, dicOut.yshiftsROI);
+                % xShiftsFit = pix2um(test.dx, dicOut.xShiftsFit);
+                % yShiftsFit = pix2um(test.dy, dicOut.yShiftsFit);
                 % 
                 % % leave ROI outputs in pixels -- mainly used for debugging
                 % ROI = dicOut.ROI;
@@ -190,9 +191,10 @@ if nStart>1
             %skip DIC and write zero shifts
             % m=1;
             disp(['Mean X-shift length 0 pixels' newline 'Mean Y-shift length 0 pixels'  newline 'Mean shift length 0 pixels']);
-            job.shifts{n}(1) = pairShifts(zeros(size(imRef)),zeros(size(imRef)),[],[],[]);
-            % job.shifts{n}{1}.x = zeros(size(imRef));
-            % job.shifts{n}{1}.y = zeros(size(imRef));
+            job.shifts{n}(1) = pairShifts(zeros(size(imRef)),zeros(size(imRef)),[],[],...
+                [],[],[],[],[]);
+            % job.shifts{n}{1}.xShiftsMap = zeros(size(imRef));
+            % job.shifts{n}{1}.yShiftsMap = zeros(size(imRef));
         else
             for m = 1:numel(test.distortionModel)
                 disp(['Distortion model ' test.distortionModel{m} ':']);
@@ -200,17 +202,17 @@ if nStart>1
                 % 
                 % % output is in pixels - convert to length units
                 % pix2um = @(dxy,outPix) dxy*outPix;
-                % job.shifts{n}{m}.x = pix2um(test.dx, dicOut.x);
-                % job.shifts{n}{m}.y = pix2um(test.dy, dicOut.y);
-                % job.shifts{n}{m}.xshiftsROI = pix2um(test.dx, dicOut.xshiftsROI);
-                % job.shifts{n}{m}.yshiftsROI = pix2um(test.dy, dicOut.yshiftsROI);
+                % job.shifts{n}{m}.xShiftsMap = pix2um(test.dx, dicOut.x);
+                % job.shifts{n}{m}.yShiftsMap = pix2um(test.dy, dicOut.y);
+                % job.shifts{n}{m}.xShiftsFit = pix2um(test.dx, dicOut.xShiftsFit);
+                % job.shifts{n}{m}.yShiftsFit = pix2um(test.dy, dicOut.yShiftsFit);
                 % 
                 %  % leave ROI outputs in pixels -- mainly used for debugging
                 % job.shifts{n}{m}.ROI = dicOut.ROI;
           
                 %TODO - figure out how to include fieldnames in anonymous function
                 %to avoid repeated code
-
+% 
 
                 job.shifts{n}(m) = pairShifts(dicOut);
 
@@ -260,8 +262,8 @@ end  %end if-check for whether or not to skip the second for-loop
             case 'ref2test'
                 sgn = -1; %subtract
         end
-        xRemap = posGrid.x + sgn*shifts.x;
-        yRemap = posGrid.y + sgn*shifts.y;
+        xRemap = posGrid.x + sgn*shifts.xShiftsMap;
+        yRemap = posGrid.y + sgn*shifts.yShiftsMap;
         %relatively fast: 6s for 1.8M pixels
         newImgInterpolant = scatteredInterpolant(xRemap(:),yRemap(:),img(:),'nearest','none');
         % very slow step: 74s for 1.8M pixels

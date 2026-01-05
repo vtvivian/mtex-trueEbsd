@@ -22,6 +22,7 @@
 % Version control
 % 20241001 - create TrueEBSD example script using copper29 data
 % 20241008 - tidy up published outputs and add voids analyses
+% 20260103 - update @trueEbsd class structures, add @pairShifts
 
 clear; close all; home;
 
@@ -33,7 +34,8 @@ startup_mtex; %variables get cleared after this step so you need to recreate mpa
 mtexPath = "/home/rock/Documents/Git-projects/mtex";
 
 
-trueEbsdPath = cd;
+% startup local MTEX (replace this with local path)
+trueEbsdPath = "/home/rock/Documents/Git-projects/mtex-trueEbsd";
 addpath(genpath(trueEbsdPath));
 
 %% Import data + file saving
@@ -45,7 +47,7 @@ cd(dataPath); %return to starting folder
 % Construct distortedImg list and set up trueEBSD job
 dataName = 'trueEbsdCopper';
 % file saving housekeeping
-setSave = 1;
+setSave = 0;
 timestamp = char(datetime('now'),'yyMMdd_HHmm');
 savepname = fullfile(dataPath, [dataName '_' timestamp]);
 
@@ -96,7 +98,7 @@ tic
 ebsd = gridify(rotate(...
     loadEBSD_h5oina("copper29.h5oina"),...
     reflection(xvector),'keepEuler'));
-ebsd.plottingConvention = plottingConvention(vector3d.Z,-vector3d.X);
+ebsd.how2plot = plottingConvention(vector3d.Z,-vector3d.X);
 
 display(ebsd);
 display(ebsd.opt.Images);
@@ -122,13 +124,13 @@ bse1b = medfilt2(bse1,[3 3],'symmetric');
 
 
 %% Set up TrueEBSD job
-% @distortedImg imgList(n) is a TrueEBSD class containing information 
+% @distortedImg imgList is a TrueEBSD class containing information 
 % about an image or EBSD map and its distortion type relative to the next
 % [(n+1)th] image in the sequence.
 % The final reference image bse1b has very low grain boundary contrast,
 % so we set the 'highContrast' flag to 0.
 
-% Construct @distortedImg imgList{:} 
+% Construct @distortedImg imgList
 imgList=createArray(4,1,'distortedImg');
 imgList(1) = distortedImg('bc','drift-shift', ebsd, 'mapPlottingConvention', ebsd.plottingConvention, 'highContrast',1,'edgePadWidth',3);
 imgList(2) = distortedImg(fsd1a,'tilt', 'dxy', double(ebsd.opt.Images.Header.X_Step), 'highContrast',1,'edgePadWidth',3); % 
@@ -164,11 +166,11 @@ t1  = toc;
 disp(['Finished set up trueEBSD job for ' dataName ' in ' num2str(t1,'%.1f') ' seconds']);
 
 %% Resize images to match pixel size and FOV
-% The EBSD map and images in |job.imgList{:}| are of the same sample area but
+% The EBSD map and images in |job.imgList| are of the same sample area but
 % have different pixel sizes. Here, we match up the pixel positions of the 
-% the image sequence in |job.imgList{:}|.
+% the image sequence in |job.imgList|.
 %
-% Inputs - distorted image sequence |job.imgList{:}|, target pixel size pixSzIn
+% Inputs - distorted image sequence |job.imgList|, target pixel size pixSzIn
 %
 % Outputs - distorted image sequence on a common pixel grid
 % |job.resizedList{:}|.
@@ -216,7 +218,7 @@ end
 linkaxes;
 if setSave, saveFigs(gcf,[dataName '_figs.pdf'],savepname); close; end
 
-%%% Compute image shifts
+%% Compute image shifts
 
 job = calcShifts(job,'fitErr');
 
@@ -238,6 +240,7 @@ disp(['Finished calculate image shifts and fit distortion models for ' dataName 
 job = undistort(job);
 
 %% Plot images after distortion correction
+display(job);
 
 figure('WindowState', 'maximized'); 
 t=tiledlayout('flow','TileSpacing','tight','Padding','tight');
@@ -619,7 +622,6 @@ if setSave
     figHandles = findobj('Type','figure');
     %sort figures in creation order
     [~,ix]=sort([figHandles.Number],'ascend');
-    % Loop through figures 2:end
     for n = 1:numel(figHandles)
         saveFigs(figHandles(ix(n)),[dataName '_figs.pdf'],savepname); close;
     end
