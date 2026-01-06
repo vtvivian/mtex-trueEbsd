@@ -214,7 +214,7 @@ classdef distortedImg
                 case 'drift'
                     out = {'linearinterp'};
                 case 'drift-shift'
-                    out = {'linearinterp','poly11'};
+                    out = {'poly11','linearinterp'};
                 case 'drift-interp'
                     out = {'linearinterp','interpolate'};
                 case 'tilt'
