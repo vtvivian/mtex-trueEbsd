@@ -91,7 +91,7 @@ if any(ebsdIdx)
         
         plot(job.undistortedList{n1}.ebsd, ...
             ij2EbsdSquare(job.undistortedList{n1}.ebsd,img1), ...
-            job.undistortedList{n1}.ebsd.plottingConvention);
+            job.undistortedList{n1}.ebsd.how2plot);
         mtexColorMap gray;
         title(['Undistorted MTEX image ' num2str(n)]);
     end
@@ -128,8 +128,8 @@ if any(ebsdIdx)
         ipfKey.inversePoleFigureDirection = ipfvec;
         ipfCols = ipfKey.orientation2color(job.undistortedList{n}.ebsd(phaseName).orientations);
         
-        plot(job.resizedList{n}.ebsd,job.resizedList{n}.ebsd.x,job.resizedList{n}.ebsd.plottingConvention,'faceAlpha',0); hold on;      
-        plot(job.undistortedList{n}.ebsd(phaseName),ipfCols,job.undistortedList{n}.ebsd.plottingConvention);
+        plot(job.resizedList{n}.ebsd,job.resizedList{n}.ebsd.x,job.resizedList{n}.ebsd.how2plot,'faceAlpha',0); hold on;      
+        plot(job.undistortedList{n}.ebsd(phaseName),ipfCols,job.undistortedList{n}.ebsd.how2plot);
         title(['Undistorted EBSD Map ' num2str(n)]);
         if setSave
             saveFigs(gcf,['ebsd_ipfNorth' num2str(n)],savepname);

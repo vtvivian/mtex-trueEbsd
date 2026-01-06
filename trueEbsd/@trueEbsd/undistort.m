@@ -117,7 +117,7 @@ for n=numel(job.resizedList):-1:1
 
         % write to output
         job.undistortedList(n).ebsd = gridify(ebsd1);
-        job.undistortedList(n).ebsd.plottingConvention = job.resizedList(n).ebsd.plottingConvention;
+        job.undistortedList(n).ebsd.how2plot = job.resizedList(n).ebsd.how2plot;
 
     end
 end

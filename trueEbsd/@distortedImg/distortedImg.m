@@ -35,7 +35,7 @@ classdef distortedImg
     % - Pixel size in μm, numeric scalar, optional if you can read this
     %     from the EBSD object
     %
-    % 'mapplottingConvention', <@plottingConvention>
+    % 'how2plot', <@plottingConvention>
     % @plottingConvention is a MTEX class
     % - Defaults in @distortedImg constructor to axis ij convention (+X
     %     points East, +Y points South, +Z points into screen) which is always
@@ -100,8 +100,8 @@ classdef distortedImg
         ebsd = EBSD % @EBSD or @EBSDSquare MTEX object, same pixel positions 
         % as disImg.img
         pixelTime = 0 % EBSD exposure time or image pixel dwell time in ms
-        mapPlottingConvention = plottingConvention(-vector3d.Z,vector3d.X) %from 
-        % option 'mapplottingConvention', <MTEX @plottingConvention> - defaults 
+        how2plot = plottingConvention(-vector3d.Z,vector3d.X) %from 
+        % option 'how2plot', <MTEX @plottingConvention> - defaults 
         % to 'axis image'
         highContrast = nan %from option 'highContrast', <1 or 0>, scalar/logical 
         % 1 = good edge contrast, 0 = poor edge contrast
@@ -141,7 +141,7 @@ classdef distortedImg
 
             % handle optional inputs
             disImg.pixelTime = get_option(varargin,'pixelTime',0,{'double';'single';'uint8';'uint16';'uint32'});
-            disImg.mapPlottingConvention  = get_option(varargin,'mapPlottingConvention',plottingConvention(-vector3d.Z,vector3d.X),{'plottingConvention'});
+            disImg.how2plot  = get_option(varargin,'how2plot',plottingConvention(-vector3d.Z,vector3d.X),{'plottingConvention'});
 
             % import EBSD object
             [disImg.ebsd,varargin] = getClass(varargin,'EBSD');  % includes EBSDSquare and EBSDHex
@@ -161,7 +161,7 @@ classdef distortedImg
 
                 % extract img if required
                 if isa(img,'char')
-                    disImg.img = im2double(ebsdSquare2ij(disImg.ebsd,img,disImg.mapPlottingConvention));
+                    disImg.img = im2double(ebsdSquare2ij(disImg.ebsd,img,disImg.how2plot));
                 end
             else
                 dxy = get_option(varargin,'dxy',0,{'double';'single';'uint8';'uint16';'uint32'});

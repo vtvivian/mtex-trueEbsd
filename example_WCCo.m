@@ -41,7 +41,7 @@ cd(dataPath); %return to starting folder
 % Construct distortedImg list and set up trueEBSD job
 dataName = 'trueEbsdWCCo';
 % file saving housekeeping
-setSave = 0;
+setSave = 1;
 timestamp = char(datetime('now'),'yyMMdd_HHmm');
 savepname = fullfile(dataPath, [dataName '_' timestamp]);
 
@@ -119,7 +119,7 @@ ebsd.opt.trueEbsdImgs.fsdT10 = rescale(imboxfilt(ebsd.opt.trueEbsdImgs.fsdT10,3)
 
 % Construct @distortedImg imgList
 imgList=createArray(5,1,'distortedImg');
-imgList(1) = distortedImg('bc','drift-shift', ebsd, 'mapplottingConvention', ebsd.plottingConvention, 'highContrast',1,'edgePadWidth',3);
+imgList(1) = distortedImg('bc','drift-shift', ebsd, 'how2plot', ebsd.how2plot, 'highContrast',1,'edgePadWidth',3);
 imgList(2) = distortedImg(ebsd.opt.trueEbsdImgs.fsdB3,'true', 'dxy', ebsd.opt.trueEbsdImgs.pixSzImg, 'highContrast',1,'edgePadWidth',5);
 imgList(3) = distortedImg(ebsd.opt.trueEbsdImgs.fsdT3,'shift', 'dxy', ebsd.opt.trueEbsdImgs.pixSzImg, 'highContrast',1,'edgePadWidth',5);
 imgList(4) = distortedImg(ebsd.opt.trueEbsdImgs.fsdT1,'tilt', 'dxy', ebsd.opt.trueEbsdImgs.pixSzImg, 'highContrast',1,'edgePadWidth',5);
@@ -144,6 +144,7 @@ for n=1:numel(imgList)
     colormap gray; axis image on ij;
 end
 linkaxes;
+if setSave, saveFigs(gcf,[dataName '_figs.pdf'],savepname); close; end
 
 t1  = toc;
 disp(['Finished set up trueEBSD job for ' dataName ' in ' num2str(t1,'%.1f') ' seconds']);
@@ -223,6 +224,7 @@ for n=1:numel(job.resizedList)
     colormap gray; axis image on ij;
 end
 linkaxes;
+if setSave, saveFigs(gcf,[dataName '_figs.pdf'],savepname); close; end
 
 %% Compute image shifts
 % Now we compute local image ROI shifts and fit them to distortion models. 
@@ -280,6 +282,7 @@ for n=1:numel(job.undistortedList)
     colormap gray; axis image on ij;
 end
 linkaxes;
+if setSave, saveFigs(gcf,[dataName '_figs.pdf'],savepname); close; end
 
 t1  = toc;
 disp(['Finished remove image distortions for ' dataName ' in ' num2str(t1,'%.1f') ' seconds']);
@@ -290,22 +293,23 @@ disp(['Finished remove image distortions for ' dataName ' in ' num2str(t1,'%.1f'
 % make sure images are not indexed 'upside down' relative to the EBSD map.
 % Since images are usually stored and read by MATLAB using the 'axis ij'
 % convention, but EBSD maps can have other kinds of plotting convention defined
-% in ebsd.plottingConvention, we need the ij2EbsdSquare helper function to
+% in ebsd.how2plot, we need the ij2EbsdSquare helper function to
 % rotate the image data into the ebsd map plottingConvention.
 
 figure;
 nextAxis;
 plot(job.undistortedList(1).ebsd('W C'), job.undistortedList(1).ebsd('W C').orientations, ...
-    job.undistortedList(1).ebsd.plottingConvention,'coordinates','on');
+    job.undistortedList(1).ebsd.how2plot,'coordinates','on');
 title('Undistorted MTEX EBSD map (WC IPF-out of screen)','Color','k');
 for n=1:numel(job.undistortedList)
     nextAxis;
     plot(job.undistortedList(1).ebsd, ...
         ij2EbsdSquare(job.undistortedList(1).ebsd,job.undistortedList(n).img), ...
-        job.undistortedList(1).ebsd.plottingConvention,'coordinates','on');
+        job.undistortedList(1).ebsd.how2plot,'coordinates','on');
     mtexColorMap gray;
     title(['Undistorted MTEX image ' num2str(n)],'Color','k');
 end
+if setSave, saveFigs(gcf,[dataName '_figs.pdf'],savepname); close; end
 
 
 %%% Finish

@@ -47,7 +47,7 @@ cd(dataPath); %return to starting folder
 % Construct distortedImg list and set up trueEBSD job
 dataName = 'trueEbsdCopper';
 % file saving housekeeping
-setSave = 0;
+setSave = 1;
 timestamp = char(datetime('now'),'yyMMdd_HHmm');
 savepname = fullfile(dataPath, [dataName '_' timestamp]);
 
@@ -132,7 +132,7 @@ bse1b = medfilt2(bse1,[3 3],'symmetric');
 
 % Construct @distortedImg imgList
 imgList=createArray(4,1,'distortedImg');
-imgList(1) = distortedImg('bc','drift-shift', ebsd, 'mapPlottingConvention', ebsd.plottingConvention, 'highContrast',1,'edgePadWidth',3);
+imgList(1) = distortedImg('bc','drift-shift', ebsd, 'how2plot', ebsd.how2plot, 'highContrast',1,'edgePadWidth',3);
 imgList(2) = distortedImg(fsd1a,'tilt', 'dxy', double(ebsd.opt.Images.Header.X_Step), 'highContrast',1,'edgePadWidth',3); % 
 imgList(3) = distortedImg(bse1a,'true', 'dxy', double(ebsd.opt.Images.Header.X_Step), 'highContrast',1,'edgePadWidth',3); % 
 imgList(4) = distortedImg(bse1b,'true', 'dxy', double(ebsd.opt.Images.Header.X_Step), 'highContrast',0,'edgePadWidth',1); % BSE but with pores only
@@ -264,22 +264,23 @@ disp(['Finished remove image distortions for ' dataName ' in ' num2str(t1,'%.1f'
 % make sure images are not indexed 'upside down' relative to the EBSD map.
 % Since images are usually stored and read by MATLAB using the 'axis ij'
 % convention, but EBSD maps can have other kinds of plotting convention defined
-% in ebsd.plottingConvention, we need the ij2EbsdSquare helper function to
+% in ebsd.how2plot, we need the ij2EbsdSquare helper function to
 % rotate the image data into the ebsd map plottingConvention.
 
 figure;
 nextAxis;
 plot(job.undistortedList(1).ebsd('indexed'), job.undistortedList(1).ebsd('indexed').orientations, ...
-    job.undistortedList(1).ebsd.plottingConvention,'coordinates','on');
+    job.undistortedList(1).ebsd.how2plot,'coordinates','on');
 title('Undistorted MTEX EBSD map (Copper IPF-out of screen)','Color','k');
 for n=1:numel(job.undistortedList)
     nextAxis;
     plot(job.undistortedList(1).ebsd, ...
         ij2EbsdSquare(job.undistortedList(1).ebsd,job.undistortedList(n).img), ...
-        job.undistortedList(1).ebsd.plottingConvention,'coordinates','on');
+        job.undistortedList(1).ebsd.how2plot,'coordinates','on');
     mtexColorMap gray;
     title(['Undistorted MTEX image ' num2str(n)],'Color','k');
 end
+if setSave, saveFigs(gcf,[dataName '_figs.pdf'],savepname); close; end
 
 %%
 % This is the end of the TrueEBSD distortion correction workflow. 
@@ -305,7 +306,7 @@ bse = job.undistortedList(4).img;
 [~,~,~,keepGrid] = FindLargestRectangles(~isnan(job.undistortedList(1).img));
 ebsd = gridify(ebsd(ij2EbsdSquare(ebsd,keepGrid)));
 % ebsd forgets its plottingConvention after gridify so we remind it here
-ebsd.plottingConvention = job.undistortedList(1).mapPlottingConvention; 
+ebsd.how2plot = job.undistortedList(1).how2plot; 
 %repeat for binarised reference image
 bse = reshape(bse(keepGrid),size(ebsd));
 
@@ -318,7 +319,7 @@ voidPhase = crystalSymmetry('1','mineral','voids','color',str2rgb('DarkBlue'));
 ebsd(phasesBse).rotations = rotation('euler',0,0,0);
 ebsd(phasesBse).CS = voidPhase;
 ebsd = gridify(ebsd);
-ebsd.plottingConvention = job.undistortedList(1).mapPlottingConvention; 
+ebsd.how2plot = job.undistortedList(1).how2plot; 
 
 display(ebsd);
 
@@ -353,7 +354,7 @@ if setSave, saveFigs(gcf,[dataName '_figs.pdf'],savepname); close; end
 
 [~,ebsd('Copper').grainId] = calcGrains(ebsd('Copper'),'angle',10*degree);
 ebsdCopper = gridify(smooth(ebsd('Copper'),'fill'));
-ebsdCopper.plottingConvention=ebsd.plottingConvention;
+ebsdCopper.how2plot=ebsd.how2plot;
 
 [grains,ebsdCopper('Copper').grainId] = calcGrains(ebsdCopper('Copper'),'angle',10*degree);
 %redraw boundaries using new contour algorithm
@@ -370,16 +371,16 @@ tPGbs = grains.boundary(tPs.boundaryId);
 % plot ebsd map with voids overlaid
 figure; newMtexFigure('layout',[2,1]);
 nextAxis;
-plot(ebsd,ebsd.bc,ebsd.plottingConvention,'micronbar','off'); 
+plot(ebsd,ebsd.bc,ebsd.how2plot,'micronbar','off'); 
 mtexColorMap gray; hold on; 
-plot(ebsd('indexed'),ebsd.plottingConvention,'FaceAlpha',0.7);
+plot(ebsd('indexed'),ebsd.how2plot,'FaceAlpha',0.7);
 mtexTitle('Band Contrast and Phases');
 nextAxis;
 plot(ebsd('Copper'),ebsd('Copper').orientations,'FaceAlpha',0.5,...
-    ebsd.plottingConvention,'micronbar','on'); hold on;
-plot(gBs,ebsd.plottingConvention,'linewidth',1,'linecolor','g');
-plot(tPGbs,ebsd.plottingConvention,'linewidth',2,'linecolor','m');
-plot(ebsd('voids'),zeros(size(ebsd('voids'))),ebsd.plottingConvention);
+    ebsd.how2plot,'micronbar','on'); hold on;
+plot(gBs,ebsd.how2plot,'linewidth',1,'linecolor','g');
+plot(tPGbs,ebsd.how2plot,'linewidth',2,'linecolor','m');
+plot(ebsd('voids'),zeros(size(ebsd('voids'))),ebsd.how2plot);
 mtexTitle('Copper Orientations (IPF-out of screen), Grain Boundaries and Voids');
 if setSave, saveFigs(gcf,[dataName '_figs.pdf'],savepname); close; end
 
@@ -413,12 +414,12 @@ tpPosMap(id2ind(ebsdCopper,tpEbsdIdList))=tpIdList(ia);  %tPGbs indices
 % these variables are.
 figure; 
 nextAxis;
-plot(ebsdCopper,gbPosMap,ebsdCopper.plottingConvention); colormap gray; hold on; mtexColorbar;
-plot(gBs,ebsdCopper.plottingConvention,'lineColor','g');
+plot(ebsdCopper,gbPosMap,ebsdCopper.how2plot); colormap gray; hold on; mtexColorbar;
+plot(gBs,ebsdCopper.how2plot,'lineColor','g');
 nextAxis;
-plot(ebsdCopper,tpPosMap,ebsdCopper.plottingConvention); colormap gray; hold on; mtexColorbar;
-plot(gBs,ebsdCopper.plottingConvention,'lineColor','g');
-plot(tPGbs,ebsdCopper.plottingConvention,'lineColor','m','lineWidth',1);
+plot(ebsdCopper,tpPosMap,ebsdCopper.how2plot); colormap gray; hold on; mtexColorbar;
+plot(gBs,ebsdCopper.how2plot,'lineColor','g');
+plot(tPGbs,ebsdCopper.how2plot,'lineColor','m','lineWidth',1);
 if setSave, saveFigs(gcf,[dataName '_figs.pdf'],savepname); close; end
 
 %%
@@ -503,9 +504,9 @@ if setSave, saveFigs(gcf,[dataName '_figs.pdf'],savepname); close; end
 % threshold value by summing the TrueEBSD fit residuals (95th
 % percentile).
 
-voidsList_threshPix = prctile(sqrt(job.fitError(1).ROI.Shift_X_1.^2 + job.fitError(1).ROI.Shift_Y_1.^2),95)...
-                    + prctile(sqrt(job.fitError(2).ROI.Shift_X_1.^2 + job.fitError(2).ROI.Shift_Y_1.^2),95) ...
-                    + prctile(sqrt(job.fitError(3).ROI.Shift_X_1.^2 + job.fitError(3).ROI.Shift_Y_1.^2),95); 
+voidsList_threshPix = prctile(sqrt(job.fitError(1).xShiftsXcf.^2 + job.fitError(1).yShiftsXcf.^2),95)...
+                    + prctile(sqrt(job.fitError(2).xShiftsXcf.^2 + job.fitError(2).yShiftsXcf.^2),95) ...
+                    + prctile(sqrt(job.fitError(3).xShiftsXcf.^2 + job.fitError(3).yShiftsXcf.^2),95); 
 disp(['Threshold distance from g.b. (pixels): ' num2str(voidsList_threshPix)]);
 
 %split |voidsList| into gb segments on, near, and far from a void
@@ -571,13 +572,13 @@ mdf_all = calcDensity(gBs.misorientation);
 
 % plot EBSD map with g.b. annotations
 figure; newMtexFigure;
-plot(ebsd('Copper'),ebsd('Copper').orientations,'FaceAlpha',0.3,ebsd.plottingConvention); hold on;
-plot(gBs,ebsd.plottingConvention,'linecolor',str2rgb('gray'));
-plot(ebsd('voids'),zeros(size(ebsd('voids'))),ebsd.plottingConvention); colormap gray; clim([0 1]);
-plot(gBs(voidsListGb_on),ebsd.plottingConvention,'linecolor','g','linewidth',2);
-plot(gBs(voidsListGb_near),ebsd.plottingConvention,'linecolor',str2rgb('DarkGreen'),'linewidth',2);
-plot(tPGbs(voidsListTp_on),ebsd.plottingConvention,'linecolor','m','linewidth',3);
-plot(tPGbs(voidsListTp_near),ebsd.plottingConvention,'linecolor',str2rgb('DarkRed'),'linewidth',3);
+plot(ebsd('Copper'),ebsd('Copper').orientations,'FaceAlpha',0.3,ebsd.how2plot); hold on;
+plot(gBs,ebsd.how2plot,'linecolor',str2rgb('gray'));
+plot(ebsd('voids'),zeros(size(ebsd('voids'))),ebsd.how2plot); colormap gray; clim([0 1]);
+plot(gBs(voidsListGb_on),ebsd.how2plot,'linecolor','g','linewidth',2);
+plot(gBs(voidsListGb_near),ebsd.how2plot,'linecolor',str2rgb('DarkGreen'),'linewidth',2);
+plot(tPGbs(voidsListTp_on),ebsd.how2plot,'linecolor','m','linewidth',3);
+plot(tPGbs(voidsListTp_near),ebsd.how2plot,'linecolor',str2rgb('DarkRed'),'linewidth',3);
 if setSave, saveFigs(gcf,[dataName '_figs.pdf'],savepname); close; end
 
 %% Plot misorientation distributions 
