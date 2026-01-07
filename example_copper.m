@@ -45,7 +45,7 @@ dataPath = '/media/Files/RockShare/Work/Projects/2025_trueEbsdMtex_paper/demodat
 cd(dataPath); %return to starting folder
 
 % Construct distortedImg list and set up trueEBSD job
-dataName = 'trueEbsdCopper';
+dataName = 'trueEbsdCopper_mtex610';
 % file saving housekeeping
 setSave = 1;
 timestamp = char(datetime('now'),'yyMMdd_HHmm');
