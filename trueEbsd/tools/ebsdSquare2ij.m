@@ -2,8 +2,6 @@ function [ebsdImg] = ebsdSquare2ij(ebsd,ebsdMap,varargin)
 % index a gridified ebsd map in the same order as image ij coordinates
 % optional input - disImg.how2plot
 
-
-%TODO - move this out of the function - keep xy rot/flip tool separate
 ebsd = argin_check(ebsd,"EBSDsquare");
 if isa(ebsdMap,'char')||isa(ebsdMap,'string')
     ebsdImg = ebsd.(ebsdMap);
