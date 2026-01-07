@@ -95,18 +95,21 @@ end
 
 tic
 
-try 
-    mtexdata trueEbsdCopper
-catch
-    % download explicitly
+% Load data
+mtexdata trueEbsdCopper %available in mtex fork vtvivian
+[~,warnId] = lastwarn;
+if strcmpi(warnId,'mtex:missingData')
+    % download explicitly unless file is already present
     fName = fullfile(mtexDataPath,'EBSD','copper29.h5oina');
-    url = 'https://zenodo.org/records/16902083/files/copper29.h5oina';
-    websave(fName,url);
+    if ~isfile(fName)
+        url = 'https://zenodo.org/records/16902083/files/copper29.h5oina';
+        websave(fName,url);
+    end
     orig_state = warning;
     warning off;
     ebsd = gridify(rotate(EBSD.load(fName),reflection(xvector),'keepEuler'));
     warning(orig_state);
-    ebsd.how2plot = plottingConvention(vector3d.Z,-vector3d.X);    
+    ebsd.how2plot = plottingConvention(vector3d.Z,-vector3d.X);
 end
 
 display(ebsd);
@@ -367,7 +370,12 @@ ebsdCopper.how2plot=ebsd.how2plot;
 
 [grains,ebsdCopper('Copper').grainId] = calcGrains(ebsdCopper('Copper'),'angle',10*degree);
 %redraw boundaries using new contour algorithm
-grains = boundaryContours(grains);
+try  %function may be only available in mtex fork vtvivian
+    grains = boundaryContours(grains);
+catch 
+    warning("Skipped g.b. redrawing function boundaryContours(grains). " + ...
+        "Expect +-0.1% change to GB/TP void pixels classifications.")
+end
 % explicitly specify copper-copper boundaries to exclude map border
 gBs = grains.boundary('Copper','Copper');
 % use grain boundary segment triplets instead of triplePoints so that we
@@ -513,9 +521,9 @@ if setSave, saveFigs(gcf,[dataName '_figs.pdf'],savepname); close; end
 % threshold value by summing the TrueEBSD fit residuals (95th
 % percentile).
 
-voidsList_threshPix = prctile(sqrt(job.fitError(1).xShiftsXcf.^2 + job.fitError(1).yShiftsXcf.^2),95)...
-                    + prctile(sqrt(job.fitError(2).xShiftsXcf.^2 + job.fitError(2).yShiftsXcf.^2),95) ...
-                    + prctile(sqrt(job.fitError(3).xShiftsXcf.^2 + job.fitError(3).yShiftsXcf.^2),95); 
+voidsList_threshPix = prctile(sqrt((job.fitError(1).xShiftsXcf/job.fitError(1).dx).^2 + (job.fitError(1).yShiftsXcf/job.fitError(1).dy).^2),95)...
+                    + prctile(sqrt((job.fitError(2).xShiftsXcf/job.fitError(2).dx).^2 + (job.fitError(2).yShiftsXcf/job.fitError(2).dy).^2),95) ...
+                    + prctile(sqrt((job.fitError(3).xShiftsXcf/job.fitError(3).dx).^2 + (job.fitError(3).yShiftsXcf/job.fitError(3).dy).^2),95); 
 disp(['Threshold distance from g.b. (pixels): ' num2str(voidsList_threshPix)]);
 
 %split |voidsList| into gb segments on, near, and far from a void
