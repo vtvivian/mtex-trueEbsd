@@ -7,7 +7,6 @@ roiSize =setXCF.ROISize;
 % filters = round([log2(roiSize)/2,log2(roiSize)/4,2*log2(roiSize),log2(roiSize)]);
 Filters_setting = [0;0;round(roiSize/2);round(roiSize/4)];
 [FFTfilter,hfilter] = fFilters(roiSize,Filters_setting);
-% TODO: MOVE TO pairShifts CLASS
 % % spread out the subregions in the defined ROI and set up the position of ROIs
 [rowvals,colvals]=find(~(isnan(Image_ref)).*(~isnan(Image_test))==1);
 xmin=min(colvals);
@@ -30,10 +29,10 @@ ROI.num_pass_1 = roiNum;
 
 % perform the XCF and determine shift in x  shift in y and peak height
 try
-    [xShiftsXcf,yShiftsXcf,CCmax_1] = fDIC_xcf_mat_mex(Image_ref,Image_test,ROI,Filters_setting,setXCF.XCFMesh,hfilter,FFTfilter);
+    [xShiftsXcf,yShiftsXcf,CCmax_1] = fDIC_xcf_mat_mex(Image_ref,Image_test,ROI,Filters_setting,250,hfilter,FFTfilter);
 catch
     % %replace with the next line if fDIC_xcf_mat_mex doesn't work
-    [xShiftsXcf,yShiftsXcf,CCmax_1] = fDIC_xcf_mat(Image_ref,Image_test,ROI,Filters_setting,setXCF.XCFMesh,hfilter,FFTfilter);
+    [xShiftsXcf,yShiftsXcf,CCmax_1] = fDIC_xcf_mat(Image_ref,Image_test,ROI,Filters_setting,250,hfilter,FFTfilter);
     warning('Mex file error in fDIC_xcf_mat_mex. Check the mex file for your operating system. Mex file compiled using MATLAB version 2025a.');
 end
 %% fit a surface to the shift vector
@@ -109,7 +108,6 @@ switch fitfunc
     xShiftsXcf(nancheck,:)=[];
     yShiftsXcf(nancheck,:)=[];
 
-    
     
     [xfit, ~]=fit(roiPosY(:,1),shiftX_rows(:),fitfunc);
     [yfit, ~]=fit(roiPosY(:,1),shiftY_rows(:),fitfunc);
@@ -248,18 +246,11 @@ disp(['Mean X-shift length ' num2str(mean(abs(xShiftsXcf(:)))) ' pixels']);
 disp(['Mean Y-shift length ' num2str(mean(abs(yShiftsXcf(:)))) ' pixels']);
 disp(['Mean shift length ' num2str(mean(sqrt(abs(xShiftsXcf(:).^2+abs(yShiftsXcf(:).^2))))) ' pixels']);
 
-% convert to lengths
-pix2um = @(dxy,outPix) dxy*outPix;
 % create pairShifts object
+% but first convert shifts from pixels to um lengths
+pix2um = @(dxy,outPix) dxy*outPix;
 RegOutput = pairShifts(...
     pix2um(dx,xshifts),   pix2um(dy,yshifts),...
     pix2um(dx,xshiftsROI),pix2um(dy,yshiftsROI),...
-    xShiftsXcf, yShiftsXcf, ...
-    roiPosX, roiPosY, roiSize);
-% RegOutput.x= xshifts;
-% RegOutput.y = yshifts;
-% RegOutput.xshiftsROI= xshiftsROI;
-% RegOutput.yshiftsROI = yshiftsROI;
-% RegOutput.ROI = ROI;
-
-
+    pix2um(dx,xShiftsXcf),   pix2um(dy,yShiftsXcf),...
+    roiPosX, roiPosY, roiSize, dx, dy);

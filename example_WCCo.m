@@ -1,34 +1,34 @@
 %% MTEX TrueEBSD for WC Contiguity calculation
 %
-% authors: Vivian Tong, National Physical Laboratory, Teddington, UK; 
-% Stefan Olovsjö, Seco Tools AB, R&D Materials and Technology, 737 82
+% authors: Vivian Tong - [],
+% Stefan Olovsjö - Seco Tools AB, R&D Materials and Technology, 737 82
 % Fagersta, Sweden;
-% Contact: vivian.tong@npl.co.uk
+% Contact: vivian.tong@extern.tu-freiberg.de
 %
 % Description:  
-% Example script to run trueEBSD workflow
-% MATLAB R2024a and mtex version forked from feature/grain3d, approx mtex6.0.beta3
+% Example script to run trueEBSD workflow on WC-Co dataset
+% MATLAB R2025a on Ubuntu 24.04.3 LTS 
 %
 % Inputs:  
-% mtexdata trueEbsdWCCo
+% MTEX EBSD object (h5oina EBSD map and images). 
+% Available at: https://zenodo.org/records/13870131/files/trueEbsdWCCo.mat
 %
 % Outputs: 
-% Published html file containing code and outputs
-%
-% Version control
-% 20241001 - create TrueEBSD example script using data from SECOvisit_020_1_site1
+% <dataName>.log file with printed outputs
+% <dataName>_figs.pdf file of figures
+% <dataName>_out.mat data file.
 
 clear; close all; home;
 
 %% Add trueEBSD and MTEX MATLAB paths 
-% startup local MTEX (replace this with local path)
+% startup MTEX (replace this with local path)
 mtexPath = "/home/rock/Documents/Git-projects/mtex";
 cd(mtexPath);
 startup_mtex; %variables get cleared after this step so you need to recreate mpath
 mtexPath = "/home/rock/Documents/Git-projects/mtex";
 
 
-% startup local MTEX (replace this with local path)
+% startup trueEbsd (replace this with local path)
 trueEbsdPath = "/home/rock/Documents/Git-projects/mtex-trueEbsd";
 addpath(genpath(trueEbsdPath));
 
@@ -39,7 +39,7 @@ dataPath = '/media/Files/RockShare/Work/Projects/2025_trueEbsdMtex_paper/demodat
 cd(dataPath); %return to starting folder
 
 % Construct distortedImg list and set up trueEBSD job
-dataName = 'trueEbsdWCCo';
+dataName = 'trueEbsdWCCo_mtex610';
 % file saving housekeeping
 setSave = 1;
 timestamp = char(datetime('now'),'yyMMdd_HHmm');
@@ -95,7 +95,16 @@ end
 % all four images.
 
 tic
-mtexdata trueEbsdWCCo
+try 
+    mtexdata trueEbsdWCCo
+catch
+    % download explicitly
+    fName = fullfile(mtexDataPath,'EBSD','trueEbsdWCCo.mat');
+    url = 'https://zenodo.org/records/13870131/files/trueEbsdWCCo.mat';
+    websave(fName,url);
+    load(fName,'out'); 
+    ebsd = out; clear out;
+end
 
 display(ebsd);
 display(ebsd.opt.trueEbsdImgs);
@@ -107,9 +116,6 @@ display(ebsd.opt.trueEbsdImgs);
 %
 % job is a @trueEbsd object containing a sequence of @distortedImg
 % images.
-
-% Construct distortedImg list and set up trueEBSD job
-dataName = 'trueEbsdWCCo';
 
 % Do some simple image denoising
 ebsd.opt.trueEbsdImgs.fsdB3 = rescale(imboxfilt(ebsd.opt.trueEbsdImgs.fsdB3,3));
@@ -158,7 +164,7 @@ disp(['Finished set up trueEBSD job for ' dataName ' in ' num2str(t1,'%.1f') ' s
 %
 % Outputs - distorted image sequence on a common pixel grid job.resizedList(:)
 
-pixSzIn = 0.04; % target pixel length in microns, or 0 to default to smallest common pixel size
+pixSzIn = 0; % target pixel length in microns, or 0 to default to smallest common pixel size
 job = pixelSizeMatch(job,pixSzIn);
 
 %%%
@@ -193,7 +199,6 @@ customSetXCF1.ROISize=2^round(log2(32));
 customSetXCF1.NumROI=struct;
 customSetXCF1.NumROI.x = 40; % good rule of thumb: as many ROI as grains in FOV
 customSetXCF1.NumROI.y = round(customSetXCF1.NumROI.x * size(job.resizedList(1).img,1)/size(job.resizedList(1).img,2)); % follow image aspect ratio
-customSetXCF1.XCFMesh=250; % correlation peak upsampling, default 250
 customSetXCF1.xcfImg = 'edge'; %choose whether to correlate edge transforms or images
 
 customSetXCF2 = customSetXCF1;
@@ -226,7 +231,7 @@ end
 linkaxes;
 if setSave, saveFigs(gcf,[dataName '_figs.pdf'],savepname); close; end
 
-%% Compute image shifts
+%%% Compute image shifts
 % Now we compute local image ROI shifts and fit them to distortion models. 
 % After each image correction step, the average ROI shifts (X, Y and length
 % components) are printed to the command window. 
@@ -329,11 +334,12 @@ if setSave
     disp(['Finished saving MAT file in ' num2str(t1,'%.1f') ' seconds.']);
     
     % Save all remaining open figures
-    figHandles = findobj('Type','figure');
-    %sort figures in creation order
-    [~,ix]=sort([figHandles.Number],'ascend');
-    for n = 1:numel(figHandles)
-        saveFigs(figHandles(ix(n)),[dataName '_figs.pdf'],savepname); close;
+    figHandles = findobj('Type','figure');    
+    if ~isempty(figHandles)
+        [~,ix]=sort([figHandles.Number],'ascend');%sort figures in creation order
+        for n = 1:numel(figHandles)
+            saveFigs(figHandles(ix(n)),[dataName '_figs.pdf'],savepname); close;
+        end
     end
     t1 = toc;
     disp(['Finished saving figures as pdf in ' num2str(t1,'%.1f') ' seconds.']);

@@ -177,7 +177,6 @@ classdef distortedImg
             %estimate this for 'typical' EBSD map - maybe 25 grains across?
             setXCF.NumROI.x = 24; % guess ~1 ROI per grain in FOV?
             setXCF.NumROI.y = round(setXCF.NumROI.x * size(disImg.img,1)/size(disImg.img,2)); % follow SEM aspect ratio x:y
-            setXCF.XCFMesh=250; % correlation peak upsampling, default 250
             setXCF.xcfImg='edge'; % decide whether to use edge transform or image intensities for cross-correlation
             % % or load a custom one (but ROISize will always be rewritten
             % % when resizing images)
@@ -214,6 +213,8 @@ classdef distortedImg
                 case 'drift'
                     out = {'linearinterp'};
                 case 'drift-shift'
+                    out = {'linearinterp','poly11'};
+                case 'shift-drift'
                     out = {'poly11','linearinterp'};
                 case 'drift-interp'
                     out = {'linearinterp','interpolate'};

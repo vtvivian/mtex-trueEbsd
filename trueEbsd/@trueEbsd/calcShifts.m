@@ -123,7 +123,7 @@ if numel(job.resizedList) > nStart
                 %skip DIC and write zero shifts
                 disp(['Mean X-shift length 0 pixels' newline 'Mean Y-shift length 0 pixels'  newline 'Mean shift length 0 pixels']);
                 job.shifts{n}(1) = pairShifts(zeros(size(imRef)),zeros(size(imRef)),[],[],...
-                    [],[],[],[],[]);
+                    [],[],[],[],[],ref.dx,ref.dy);
             else
                 %loop and stack shifts from multiple distortion models
                 for m = 1:numel(test.distortionModel)
@@ -156,7 +156,7 @@ if numel(job.resizedList) > nStart
                 disp(['Residual shifts / pixels between images ' num2str(n+1) ' and ' num2str(n) ' (' test.distortionName ')']);
                 job.fitError(n)= fRunDIC(imRef,remapImage(test.pos,job.shifts{n}(end),imTest,'test2ref'),test.setXCF(end),'poly11',test.dx,test.dy);
 
-                residShiftPix = mean(sqrt(abs(job.fitError(n).xShiftsXcf(:).^2+abs(job.fitError(n).yShiftsXcf(:).^2))));
+                residShiftPix = mean(sqrt((job.fitError(n).xShiftsXcf(:)*test.dx).^2+(job.fitError(n).yShiftsXcf(:)*test.dy).^2));
                 if residShiftPix > 2  && retryInc<=retryMax  %if residual shift length is larger than 2 pixels and we said we want to retry
                     retryInc=retryInc+1; % go back and try the first pass again with a double sized ROI
                     disp(['Residual shifts length was greater than 2 pixels between images ' num2str(n+1) ' and ' num2str(n) ' (' test.distortionName ')']);
@@ -214,7 +214,7 @@ if nStart>1
                 % m=1;
                 disp(['Mean X-shift length 0 pixels' newline 'Mean Y-shift length 0 pixels'  newline 'Mean shift length 0 pixels']);
                 job.shifts{n}(1) = pairShifts(zeros(size(imRef)),zeros(size(imRef)),[],[],...
-                    [],[],[],[],[]);
+                    [],[],[],[],[],ref.dx,ref.dy);
             else
                 for m = 1:numel(test.distortionModel)
                     disp(['Distortion model ' test.distortionModel{m} ':']);
@@ -241,8 +241,9 @@ if nStart>1
             if fitErr1
                 disp(['Residual shifts between images ' num2str(n+1) ' and ' num2str(n) ' (' test.distortionName '):']);
                 job.fitError(n) = fRunDIC(imRef,remapImage(test.pos,job.shifts{n}(end),imTest,'test2ref'),test.setXCF(end),'poly11',test.dx,test.dy);
-
-                residShiftPix = mean(sqrt(abs(job.shifts{n}(1).fitError.ROI.Shift_X_1(:).^2+abs(job.shifts{n}(1).fitError.ROI.Shift_Y_1(:).^2))));
+                  
+               
+                residShiftPix = mean(sqrt((job.fitError(n).xShiftsXcf(:)*test.dx).^2+(job.fitError(n).yShiftsXcf(:)*test.dy).^2));
                 if residShiftPix > 2  && retryInc<=retryMax  %if residual shift length is larger than 2 pixels and we said we want to retry
                     retryInc=retryInc+1; % go back and try the first pass again with a double sized ROI
                     disp(['Residual shifts length was greater than 2 pixels between images ' num2str(n+1) ' and ' num2str(n) ' (' test.distortionName ')']);

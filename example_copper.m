@@ -1,23 +1,24 @@
 %% MTEX TrueEBSD for analysing grain boundary voids in a copper polycrystal
 %
-% author: Vivian Tong, National Physical Laboratory, Teddington, UK; 
+% author: Vivian Tong - []; 
 % EBSD data: "Void-Microstructure Correlation in Thin Film Copper 
 % Power Semiconductor Metallization using MTEX." Matthias Grabner,
 % Master's Thesis, Graz University of Technology, 2023.
-% Contact: vivian.tong@npl.co.uk
+% Contact: vivian.tong@extern.tu-freiberg.de
 % 
 %
 % Description:  
 % Example script to run trueEBSD workflow and postprocessing to
 % characterise grain boundary voids in a copper polycrystal.
-% MATLAB R2025a and mtex version 6.1.0 (vtfork - commit 665cc141)
+% MATLAB R2025a on Ubuntu 24.04.3 LTS 
 %
 % Inputs:  
 % copper29.h5oina
 %
 % Outputs: 
-% Published html file containing code, outputs and figures
-% example_copper_out.mat data file (not released).
+% <dataName>.log file with printed outputs
+% <dataName>_figs.pdf file of figures
+% <dataName>_out.mat data file.
 %
 % Version control
 % 20241001 - create TrueEBSD example script using copper29 data
@@ -27,14 +28,13 @@
 clear; close all; home;
 
 %% Add trueEBSD and MTEX MATLAB paths 
-% startup local MTEX (replace this with local path)
+% startup MTEX (replace this with local path)
 mtexPath = "/home/rock/Documents/Git-projects/mtex";
 cd(mtexPath);
 startup_mtex; %variables get cleared after this step so you need to recreate mpath
 mtexPath = "/home/rock/Documents/Git-projects/mtex";
 
-
-% startup local MTEX (replace this with local path)
+% startup trueEbsd(replace this with local path)
 trueEbsdPath = "/home/rock/Documents/Git-projects/mtex-trueEbsd";
 addpath(genpath(trueEbsdPath));
 
@@ -95,10 +95,19 @@ end
 
 tic
 
-ebsd = gridify(rotate(...
-    loadEBSD_h5oina("copper29.h5oina"),...
-    reflection(xvector),'keepEuler'));
-ebsd.how2plot = plottingConvention(vector3d.Z,-vector3d.X);
+try 
+    mtexdata trueEbsdCopper
+catch
+    % download explicitly
+    fName = fullfile(mtexDataPath,'EBSD','copper29.h5oina');
+    url = 'https://zenodo.org/records/16902083/files/copper29.h5oina';
+    websave(fName,url);
+    orig_state = warning;
+    warning off;
+    ebsd = gridify(rotate(EBSD.load(fName),reflection(xvector),'keepEuler'));
+    warning(orig_state);
+    ebsd.how2plot = plottingConvention(vector3d.Z,-vector3d.X);    
+end
 
 display(ebsd);
 display(ebsd.opt.Images);
@@ -132,7 +141,7 @@ bse1b = medfilt2(bse1,[3 3],'symmetric');
 
 % Construct @distortedImg imgList
 imgList=createArray(4,1,'distortedImg');
-imgList(1) = distortedImg('bc','drift-shift', ebsd, 'how2plot', ebsd.how2plot, 'highContrast',1,'edgePadWidth',3);
+imgList(1) = distortedImg('bc','shift-drift', ebsd, 'how2plot', ebsd.how2plot, 'highContrast',1,'edgePadWidth',3);
 imgList(2) = distortedImg(fsd1a,'tilt', 'dxy', double(ebsd.opt.Images.Header.X_Step), 'highContrast',1,'edgePadWidth',3); % 
 imgList(3) = distortedImg(bse1a,'true', 'dxy', double(ebsd.opt.Images.Header.X_Step), 'highContrast',1,'edgePadWidth',3); % 
 imgList(4) = distortedImg(bse1b,'true', 'dxy', double(ebsd.opt.Images.Header.X_Step), 'highContrast',0,'edgePadWidth',1); % BSE but with pores only
@@ -620,11 +629,12 @@ if setSave
     disp(['Finished saving MAT file in ' num2str(t1,'%.1f') ' seconds.']);
     
     % Save all remaining open figures
-    figHandles = findobj('Type','figure');
-    %sort figures in creation order
-    [~,ix]=sort([figHandles.Number],'ascend');
-    for n = 1:numel(figHandles)
-        saveFigs(figHandles(ix(n)),[dataName '_figs.pdf'],savepname); close;
+    figHandles = findobj('Type','figure');    
+    if ~isempty(figHandles)
+        [~,ix]=sort([figHandles.Number],'ascend');%sort figures in creation order
+        for n = 1:numel(figHandles)
+            saveFigs(figHandles(ix(n)),[dataName '_figs.pdf'],savepname); close;
+        end
     end
     t1 = toc;
     disp(['Finished saving figures as pdf in ' num2str(t1,'%.1f') ' seconds.']);
