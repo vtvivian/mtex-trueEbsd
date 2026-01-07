@@ -104,11 +104,11 @@ if numel(job.resizedList) > nStart
     for n=nStart:numel(job.resizedList)-1
         retryInc = 1; % first try = 1, second try = 2 etc
         xcf1 = job.resizedList(n).setXCF;
+        %initialise variables in for-loop
+        ref = job.resizedList(n+1);
+        test = job.resizedList(n);
         while retryInc<=retryMax % this is a while loop for retry1 but test this later
-            %initialise variables in for-loop
-            ref = job.resizedList(n+1);
-            test = job.resizedList(n);
-            
+
             disp([newline 'Calculating shifts between images ' num2str(n+1) ' and ' num2str(n) ' (' test.distortionName '):']);
 
             imRef = ref.(ref.setXCF(1).xcfImg);
@@ -194,11 +194,10 @@ if nStart>1
         %in both for-loops, n refers to the index of the test image
         retryInc = 1; % first try = 1, second try = 2 etc
         xcf1 = job.resizedList(n).setXCF;
+        %initialise variables in for-loop
+        ref = job.resizedList(n+1);
+        test = job.resizedList(n);
         while retryInc<=retryMax % this is a while loop for retry1 but test this later
-            %initialise variables in for-loop
-            ref = job.resizedList(n+1);
-            test = job.resizedList(n);
-
             disp([newline 'Calculating shifts between images ' num2str(n+1) ' and ' num2str(n) ' (' test.distortionName '):']);
 
             imTest = test.(test.setXCF(1).xcfImg);

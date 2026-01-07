@@ -95,16 +95,8 @@ end
 % all four images.
 
 tic
-try 
-    mtexdata trueEbsdWCCo
-catch
-    % download explicitly
-    fName = fullfile(mtexDataPath,'EBSD','trueEbsdWCCo.mat');
-    url = 'https://zenodo.org/records/13870131/files/trueEbsdWCCo.mat';
-    websave(fName,url);
-    load(fName,'out'); 
-    ebsd = out; clear out;
-end
+
+mtexdata trueEbsdWCCo
 
 display(ebsd);
 display(ebsd.opt.trueEbsdImgs);
@@ -125,7 +117,7 @@ ebsd.opt.trueEbsdImgs.fsdT10 = rescale(imboxfilt(ebsd.opt.trueEbsdImgs.fsdT10,3)
 
 % Construct @distortedImg imgList
 imgList=createArray(5,1,'distortedImg');
-imgList(1) = distortedImg('bc','drift-shift', ebsd, 'how2plot', ebsd.how2plot, 'highContrast',1,'edgePadWidth',3);
+imgList(1) = distortedImg('bc','shift-drift', ebsd, 'how2plot', ebsd.how2plot, 'highContrast',1,'edgePadWidth',3);
 imgList(2) = distortedImg(ebsd.opt.trueEbsdImgs.fsdB3,'true', 'dxy', ebsd.opt.trueEbsdImgs.pixSzImg, 'highContrast',1,'edgePadWidth',5);
 imgList(3) = distortedImg(ebsd.opt.trueEbsdImgs.fsdT3,'shift', 'dxy', ebsd.opt.trueEbsdImgs.pixSzImg, 'highContrast',1,'edgePadWidth',5);
 imgList(4) = distortedImg(ebsd.opt.trueEbsdImgs.fsdT1,'tilt', 'dxy', ebsd.opt.trueEbsdImgs.pixSzImg, 'highContrast',1,'edgePadWidth',5);
