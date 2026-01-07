@@ -96,7 +96,7 @@ end
 tic
 
 % Load data
-mtexdata trueEbsdCopper %available in mtex fork vtvivian
+mtexdata('trueEbsdCopper','force'); %available in mtex fork vtvivian
 [~,warnId] = lastwarn;
 if strcmpi(warnId,'mtex:missingData')
     % download explicitly unless file is already present
