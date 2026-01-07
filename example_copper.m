@@ -45,7 +45,7 @@ dataPath = '/media/Files/RockShare/Work/Projects/2025_trueEbsdMtex_paper/demodat
 cd(dataPath); %return to starting folder
 
 % Construct distortedImg list and set up trueEBSD job
-dataName = 'trueEbsdCopper_mtex610';
+dataName = 'trueEbsdCopper_mtexVtfork';
 % file saving housekeeping
 setSave = 1;
 timestamp = char(datetime('now'),'yyMMdd_HHmm');
@@ -109,7 +109,8 @@ if strcmpi(warnId,'mtex:missingData')
     warning off;
     ebsd = gridify(rotate(EBSD.load(fName),reflection(xvector),'keepEuler'));
     warning(orig_state);
-    ebsd.how2plot = plottingConvention(vector3d.Z,-vector3d.X);
+    ebsd.how2plot.east = -xvector;
+    ebsd.how2plot.outOfScreen = zvector;
 end
 
 display(ebsd);
