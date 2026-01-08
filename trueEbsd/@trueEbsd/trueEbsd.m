@@ -26,21 +26,17 @@ classdef trueEbsd
     %
 
     properties %props we define at the start
-        imgList = {distortedImg} %cell array of distortedImg objects        
-        resizedList = {distortedImg} %pixel sizes and FOV matched
-        undistortedList = {distortedImg} %undistorted
-        shifts = {}
+        imgList = distortedImg.empty  %cell array of distortedImg objects        
+        resizedList = distortedImg.empty %pixel sizes and FOV matched
+        undistortedList = distortedImg.empty  %undistorted
+        shifts = pairShifts.empty
+        fitError = pairShifts.empty
     end %properties
 
     methods
         % constructor
-        function job = trueEbsd(varargin)
-            nImgs=numel(varargin);
-            job.imgList=cell(nImgs,1);    
-             for n=1:nImgs
-                % check they're the correct type
-                job.imgList{n} = argin_check(varargin{n},{'distortedImg'});       
-            end
+        function job = trueEbsd(imgListIn)        
+            job.imgList=argin_check(imgListIn,{'distortedImg'});
         end % constructor function
 
     end %methods

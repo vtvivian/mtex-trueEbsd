@@ -35,7 +35,7 @@ classdef distortedImg
     % - Pixel size in μm, numeric scalar, optional if you can read this
     %     from the EBSD object
     %
-    % 'mapplottingConvention', <@plottingConvention>
+    % 'how2plot', <@plottingConvention>
     % @plottingConvention is a MTEX class
     % - Defaults in @distortedImg constructor to axis ij convention (+X
     %     points East, +Y points South, +Z points into screen) which is always
@@ -64,7 +64,7 @@ classdef distortedImg
     % @struct describing region of interest (ROI) size and spacing for image cross-correlation in calcShifts().
     % - The default values are calculated in pixelSizeMatch()  --
     %     reasonable values for a typical microstructure map, but you can set
-    %     this property yourself in job.resizedList{n}.setXCF.
+    %     this property yourself in job.resizedList(n).setXCF.
     % - Set this after running pixelSizeMatch(job) and before
     %     calcShifts(job), because the ROI are defined in pixel units, so it
     %     should be performed on the re-sized/scaled data.
@@ -100,8 +100,8 @@ classdef distortedImg
         ebsd = EBSD % @EBSD or @EBSDSquare MTEX object, same pixel positions 
         % as disImg.img
         pixelTime = 0 % EBSD exposure time or image pixel dwell time in ms
-        mapPlottingConvention = plottingConvention(-vector3d.Z,vector3d.X) %from 
-        % option 'mapplottingConvention', <MTEX @plottingConvention> - defaults 
+        how2plot = plottingConvention(-vector3d.Z,vector3d.X) %from 
+        % option 'how2plot', <MTEX @plottingConvention> - defaults 
         % to 'axis image'
         highContrast = nan %from option 'highContrast', <1 or 0>, scalar/logical 
         % 1 = good edge contrast, 0 = poor edge contrast
@@ -111,7 +111,7 @@ classdef distortedImg
 
     properties  %properties related to trueEbsd algorithm
         pos = vector3d % vector3d position of every pixel, computed later in pixelSizeMatch
-        setXCF = {} % settings for image registration, used in calcShifts, defaults computed in constructor function
+        setXCF = struct.empty % settings for image registration, used in calcShifts, defaults computed in constructor function
     end
 
     properties (Dependent=true) %properties we get
@@ -141,7 +141,7 @@ classdef distortedImg
 
             % handle optional inputs
             disImg.pixelTime = get_option(varargin,'pixelTime',0,{'double';'single';'uint8';'uint16';'uint32'});
-            disImg.mapPlottingConvention  = get_option(varargin,'mapPlottingConvention',plottingConvention(-vector3d.Z,vector3d.X),{'plottingConvention'});
+            disImg.how2plot  = get_option(varargin,'how2plot',plottingConvention(-vector3d.Z,vector3d.X),{'plottingConvention'});
 
             % import EBSD object
             [disImg.ebsd,varargin] = getClass(varargin,'EBSD');  % includes EBSDSquare and EBSDHex
@@ -161,7 +161,7 @@ classdef distortedImg
 
                 % extract img if required
                 if isa(img,'char')
-                    disImg.img = im2double(ebsdSquare2ij(disImg.ebsd,img,disImg.mapPlottingConvention));
+                    disImg.img = im2double(ebsdSquare2ij(disImg.ebsd,img,disImg.how2plot));
                 end
             else
                 dxy = get_option(varargin,'dxy',0,{'double';'single';'uint8';'uint16';'uint32'});
@@ -177,12 +177,11 @@ classdef distortedImg
             %estimate this for 'typical' EBSD map - maybe 25 grains across?
             setXCF.NumROI.x = 24; % guess ~1 ROI per grain in FOV?
             setXCF.NumROI.y = round(setXCF.NumROI.x * size(disImg.img,1)/size(disImg.img,2)); % follow SEM aspect ratio x:y
-            setXCF.XCFMesh=250; % correlation peak upsampling, default 250
             setXCF.xcfImg='edge'; % decide whether to use edge transform or image intensities for cross-correlation
             % % or load a custom one (but ROISize will always be rewritten
             % % when resizing images)
 
-            disImg.setXCF = get_option(varargin,'setXCF',{setXCF},{'cell'});
+            disImg.setXCF = get_option(varargin,'setXCF',setXCF,{'struct'});
             disImg.highContrast = get_option(varargin,'highContrast',0,{'double';'single';'uint8';'uint16';'uint32';'logical'});
             disImg.edgePadWidth = get_option(varargin,'edgePadWidth',1,{'double';'single';'uint8';'uint16';'uint32';'logical'});
 
@@ -215,6 +214,8 @@ classdef distortedImg
                     out = {'linearinterp'};
                 case 'drift-shift'
                     out = {'linearinterp','poly11'};
+                case 'shift-drift'
+                    out = {'poly11','linearinterp'};
                 case 'drift-interp'
                     out = {'linearinterp','interpolate'};
                 case 'tilt'
