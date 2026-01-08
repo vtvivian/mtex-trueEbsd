@@ -171,7 +171,6 @@ end
 % guess that a 'typical' EBSD map is maybe 25 grains across, so each ROI
 % should be at least 1/4th of the map width numel(vc{1})
 
-%TODO - MOVE TO pairShifts CLASS PROPERTY
 roiSizePix=2^(ceil(log2(numel(vc{1})/4))); 
 
 %%  Step 4. resample images and edge transforms on common grid 
@@ -258,12 +257,12 @@ for n = 1:numel(job.imgList)
         % recreate EBSD object
         ebsd1 = EBSD(vector3d(posEbsdX, posEbsdY,ebsdMap0), rot1, phase1, ...
             job.resizedList(n).ebsd.CSList, prop1);
-        ebsd1.plottingConvention = job.imgList(n).mapPlottingConvention;
+        ebsd1.how2plot = job.imgList(n).how2plot;
 
         % write to output
         job.resizedList(n).ebsd = gridify(ebsd1);
         % plottingConvention isn't passed on automatically in gridify so reassign this
-        job.resizedList(n).ebsd.plottingConvention = job.imgList(n).mapPlottingConvention;
+        job.resizedList(n).ebsd.how2plot = job.imgList(n).how2plot;
 
         %NOTE: don't try to use @EBSDsquare/interp because it only handles indexed EBSD
         %points when interpolating the map, this leads to e.g. ebsd.bc disappearing from unindexed
@@ -283,7 +282,6 @@ for n = 1:numel(job.imgList)
 
     % update ROI size in setXCF (from step 3), except leave reference image as it has no
     % 'next image' to correlate shifts to.
-    %TODO - MOVE TO pairShifts CLASS PROPERTY
     if  n < numel(job.imgList)
         job.resizedList(n).setXCF(1).ROISize = roiSizePix;
     end

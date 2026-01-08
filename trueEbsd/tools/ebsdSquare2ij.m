@@ -1,9 +1,7 @@
 function [ebsdImg] = ebsdSquare2ij(ebsd,ebsdMap,varargin)
 % index a gridified ebsd map in the same order as image ij coordinates
-% optional input - disImg.ebsdPlottingConvention
+% optional input - disImg.how2plot
 
-
-%TODO - move this out of the function - keep xy rot/flip tool separate
 ebsd = argin_check(ebsd,"EBSDsquare");
 if isa(ebsdMap,'char')||isa(ebsdMap,'string')
     ebsdImg = ebsd.(ebsdMap);
@@ -15,9 +13,9 @@ end
 % by default, images are always plotted in matlab with +x = east, +y = down
 % in a right handed set, this means that +z must point into the screeen
 
-e = ebsd.plottingConvention.east;
-n = ebsd.plottingConvention.north;
-o = ebsd.plottingConvention.outOfScreen;
+e = ebsd.how2plot.east;
+n = ebsd.how2plot.north;
+o = ebsd.how2plot.outOfScreen;
 
 % handle each case of axis transformations explicitly
 % the screen nwse must be aligned to xyz vectors.

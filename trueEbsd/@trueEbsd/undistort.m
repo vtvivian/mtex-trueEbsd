@@ -54,8 +54,8 @@ for n=numel(job.resizedList):-1:1
         % yTrue = yTrue;
     else
         for m = 1:numel(job.shifts{n})
-            xTrue = xTrue + job.shifts{n}(m).x;
-            yTrue = yTrue + job.shifts{n}(m).y;
+            xTrue = xTrue + job.shifts{n}(m).xShiftsMap;
+            yTrue = yTrue + job.shifts{n}(m).yShiftsMap;
         end
     end
     %% create scattered interpolant function and resample on original image grid
@@ -117,7 +117,7 @@ for n=numel(job.resizedList):-1:1
 
         % write to output
         job.undistortedList(n).ebsd = gridify(ebsd1);
-        job.undistortedList(n).ebsd.plottingConvention = job.resizedList(n).ebsd.plottingConvention;
+        job.undistortedList(n).ebsd.how2plot = job.resizedList(n).ebsd.how2plot;
 
     end
 end

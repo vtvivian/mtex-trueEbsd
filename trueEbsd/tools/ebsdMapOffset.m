@@ -5,9 +5,9 @@ function [ebsd] = ebsdMapOffset(ebsd,offsetPosE, offsetPosS,varargin)
 
 % by default, images are always plotted in matlab with +x = east, +y = down
 % in a right handed set, this means that +z must point into the screeen
-e = ebsd.plottingConvention.east;
-n = ebsd.plottingConvention.north;
-o = ebsd.plottingConvention.outOfScreen;
+e = ebsd.how2plot.east;
+n = ebsd.how2plot.north;
+o = ebsd.how2plot.outOfScreen;
 
 % handle each case of axis transformations explicitly
 % the screen nwse must be aligned to xyz vectors.

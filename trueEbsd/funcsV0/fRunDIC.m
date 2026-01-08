@@ -1,57 +1,64 @@
 function [RegOutput]= fRunDIC(Image_ref,Image_test,setXCF,fitfunc,dx,dy)
 %% Unpack inputs
-ROI.size_pass_1 =setXCF.ROISize;
-% setXCF.NumROI = setXCF.NumROI;
-% setXCF.XCFMesh = setXCF.XCFMesh; % XCF mesh size default value is 250
-
+roiSize =setXCF.ROISize;
 %% run  main functions
 %set up ROIs
 % set up the filter windows, boundary
-% filters = round([log2(ROI.size_pass_1)/2,log2(ROI.size_pass_1)/4,2*log2(ROI.size_pass_1),log2(ROI.size_pass_1)]);
-Filters_setting = [0;0;round(ROI.size_pass_1/2);round(ROI.size_pass_1/4)];
+% filters = round([log2(roiSize)/2,log2(roiSize)/4,2*log2(roiSize),log2(roiSize)]);
+Filters_setting = [0;0;round(roiSize/2);round(roiSize/4)];
+[FFTfilter,hfilter] = fFilters(roiSize,Filters_setting);
+% % spread out the subregions in the defined ROI and set up the position of ROIs
 [rowvals,colvals]=find(~(isnan(Image_ref)).*(~isnan(Image_test))==1);
 xmin=min(colvals);
 ymin=min(rowvals);
 xmax=max(colvals);
 ymax=max(rowvals);
 boundary = [xmin+1,ymin+1,xmax-xmin-1,ymax-ymin-1]; %[left edge top edge width height], like imcrop.
-[FFTfilter,hfilter] = fFilters(ROI.size_pass_1,Filters_setting);
-% TODO: MOVE TO ROI CLASS
-% % spread out the subregions in the defined ROI and set up the position of ROIs
-[ROI.position_X_pass_1, ROI.position_Y_pass_1,ROI.num_x_pass_1,ROI.num_y_pass_1, ROI.coordinator_pass_1, ROI.num_pass_1] = fDIC_ROI_position(ROI.size_pass_1,setXCF.NumROI,boundary);
+[roiPosX, roiPosY,roiCoord,roiNum] = fDIC_ROI_position(roiSize,setXCF.NumROI,boundary);
+
+% create temporary ROI structure (TODO - repack this into setXCF for
+% fDIC_xcf_mat)
+ROI = struct;
+ROI.size_pass_1 =roiSize;
+ROI.position_X_pass_1=roiPosX;
+ROI.position_Y_pass_1=roiPosY;
+ROI.num_x_pass_1 = size(roiCoord,2); % not needed - can delete if re-compiling mex file 
+ROI.num_y_pass_1 = size(roiCoord,1); % "
+ROI.coordinator_pass_1=roiCoord;
+ROI.num_pass_1 = roiNum;
 
 % perform the XCF and determine shift in x  shift in y and peak height
 try
-    [ROI.Shift_X_1,ROI.Shift_Y_1,CCmax_1] = fDIC_xcf_mat_mex(Image_ref,Image_test,ROI,Filters_setting,setXCF.XCFMesh,hfilter,FFTfilter);
+    [xShiftsXcf,yShiftsXcf,CCmax_1] = fDIC_xcf_mat_mex(Image_ref,Image_test,ROI,Filters_setting,250,hfilter,FFTfilter);
 catch
     % %replace with the next line if fDIC_xcf_mat_mex doesn't work
-    [ROI.Shift_X_1,ROI.Shift_Y_1,CCmax_1] = fDIC_xcf_mat(Image_ref,Image_test,ROI,Filters_setting,setXCF.XCFMesh,hfilter,FFTfilter);
+    [xShiftsXcf,yShiftsXcf,CCmax_1] = fDIC_xcf_mat(Image_ref,Image_test,ROI,Filters_setting,250,hfilter,FFTfilter);
     warning('Mex file error in fDIC_xcf_mat_mex. Check the mex file for your operating system. Mex file compiled using MATLAB version 2025a.');
 end
 %% fit a surface to the shift vector
-% figure, imagesc(ROI.Shift_X_1); axis equal; caxis([-15 -5]);
-% figure, imagesc(ROI.Shift_Y_1); axis equal; caxis([-5 5]);
+% figure, imagesc(xShiftsXcf); axis equal; caxis([-15 -5]);
+% figure, imagesc(yShiftsXcf); axis equal; caxis([-5 5]);
 
-% ROI.position_X_pass_1 and ROI.position_Y_pass_1 are the ROI centre locations
+% roiPosX and roiPosY are the ROI centre locations
 switch fitfunc
     case 'poly11'
     %remove values with NaN XCF height
-    ROI.Shift_X_1=ROI.Shift_X_1(~isnan(CCmax_1));
-    ROI.Shift_Y_1=ROI.Shift_Y_1(~isnan(CCmax_1));
-    ROI.position_X_pass_1=ROI.position_X_pass_1(~isnan(CCmax_1));
-    ROI.position_Y_pass_1=ROI.position_Y_pass_1(~isnan(CCmax_1));
+    xShiftsXcf=xShiftsXcf(~isnan(CCmax_1));
+    yShiftsXcf=yShiftsXcf(~isnan(CCmax_1));
+    roiPosX=roiPosX(~isnan(CCmax_1));
+    roiPosY=roiPosY(~isnan(CCmax_1));
     CCmax=CCmax_1(~isnan(CCmax_1));
 
     % calculate best fit
-    [xsurf, ~]=fit([ROI.position_X_pass_1(:),ROI.position_Y_pass_1(:)],ROI.Shift_X_1(:),fitfunc,'Robust','Bisquare','Weights',CCmax);
-    [ysurf, ~]=fit([ROI.position_X_pass_1(:),ROI.position_Y_pass_1(:)],ROI.Shift_Y_1(:),fitfunc,'Robust','Bisquare','Weights',CCmax);
+    [xsurf, ~]=fit([roiPosX(:),roiPosY(:)],xShiftsXcf(:),fitfunc,'Robust','Bisquare','Weights',CCmax);
+    [ysurf, ~]=fit([roiPosX(:),roiPosY(:)],yShiftsXcf(:),fitfunc,'Robust','Bisquare','Weights',CCmax);
     RegOutput.transMat = [xsurf.p10+1,xsurf.p01,xsurf.p00;
         ysurf.p10,ysurf.p01+1,ysurf.p00;
         0,0,1];
     
     %for quiver plot
-    xshiftsROI=xsurf(ROI.position_X_pass_1,ROI.position_Y_pass_1);
-    yshiftsROI=ysurf(ROI.position_X_pass_1,ROI.position_Y_pass_1);
+    xshiftsROI=xsurf(roiPosX,roiPosY);
+    yshiftsROI=ysurf(roiPosX,roiPosY);
     
     % for entire image
     [Xpixels,Ypixels]=meshgrid(1:size(Image_ref,2),1:size(Image_ref,1)); %pixel grid in reference frame
@@ -60,20 +67,20 @@ switch fitfunc
     
     case 'poly22'
     %remove values with NaN XCF height
-    ROI.Shift_X_1=ROI.Shift_X_1(~isnan(CCmax_1));
-    ROI.Shift_Y_1=ROI.Shift_Y_1(~isnan(CCmax_1));
-    ROI.position_X_pass_1=ROI.position_X_pass_1(~isnan(CCmax_1));
-    ROI.position_Y_pass_1=ROI.position_Y_pass_1(~isnan(CCmax_1));
+    xShiftsXcf=xShiftsXcf(~isnan(CCmax_1));
+    yShiftsXcf=yShiftsXcf(~isnan(CCmax_1));
+    roiPosX=roiPosX(~isnan(CCmax_1));
+    roiPosY=roiPosY(~isnan(CCmax_1));
     CCmax=CCmax_1(~isnan(CCmax_1));
 
     % calculate best fit
-    [xsurf, ~]=fit([ROI.position_X_pass_1(:),ROI.position_Y_pass_1(:)],ROI.Shift_X_1(:),fitfunc,'Robust','Bisquare','Weights',CCmax);
-    [ysurf, ~]=fit([ROI.position_X_pass_1(:),ROI.position_Y_pass_1(:)],ROI.Shift_Y_1(:),fitfunc,'Robust','Bisquare','Weights',CCmax);
+    [xsurf, ~]=fit([roiPosX(:),roiPosY(:)],xShiftsXcf(:),fitfunc,'Robust','Bisquare','Weights',CCmax);
+    [ysurf, ~]=fit([roiPosX(:),roiPosY(:)],yShiftsXcf(:),fitfunc,'Robust','Bisquare','Weights',CCmax);
     
     
     %for quiver plot
-    xshiftsROI=xsurf(ROI.position_X_pass_1,ROI.position_Y_pass_1);
-    yshiftsROI=ysurf(ROI.position_X_pass_1,ROI.position_Y_pass_1);
+    xshiftsROI=xsurf(roiPosX,roiPosY);
+    yshiftsROI=ysurf(roiPosX,roiPosY);
     
     % for entire image
     [Xpixels,Ypixels]=meshgrid(1:size(Image_ref,2),1:size(Image_ref,1)); %pixel grid in reference frame
@@ -82,11 +89,11 @@ switch fitfunc
     
     
     case 'linearinterp'
-    CCmax=reshape(CCmax_1,size(ROI.coordinator_pass_1));
+    CCmax=reshape(CCmax_1,size(roiCoord));
     shiftX_temp=nan(size(CCmax));
     shiftY_temp=shiftX_temp;
-    shiftX_temp(~isnan(CCmax))=ROI.Shift_X_1(~isnan(CCmax));
-    shiftY_temp(~isnan(CCmax))=ROI.Shift_Y_1(~isnan(CCmax));
+    shiftX_temp(~isnan(CCmax))=xShiftsXcf(~isnan(CCmax));
+    shiftY_temp(~isnan(CCmax))=yShiftsXcf(~isnan(CCmax));
     
     % calculate best fit
     shiftX_rows=median(shiftX_temp,2,'omitnan');
@@ -94,23 +101,22 @@ switch fitfunc
     
     nancheck=isnan(shiftX_rows) | isnan(shiftY_rows);
     
-    ROI.position_Y_pass_1(nancheck,:)=[];
-    ROI.position_X_pass_1(nancheck,:)=[];
+    roiPosY(nancheck,:)=[];
+    roiPosX(nancheck,:)=[];
     shiftX_rows(nancheck)=[];
     shiftY_rows(nancheck)=[];
-    ROI.Shift_X_1(nancheck,:)=[];
-    ROI.Shift_Y_1(nancheck,:)=[];
+    xShiftsXcf(nancheck,:)=[];
+    yShiftsXcf(nancheck,:)=[];
 
     
-    
-    [xfit, ~]=fit(ROI.position_Y_pass_1(:,1),shiftX_rows(:),fitfunc);
-    [yfit, ~]=fit(ROI.position_Y_pass_1(:,1),shiftY_rows(:),fitfunc);
+    [xfit, ~]=fit(roiPosY(:,1),shiftX_rows(:),fitfunc);
+    [yfit, ~]=fit(roiPosY(:,1),shiftY_rows(:),fitfunc);
     
     %for quiver plot
-    xshifts_lineROI=xfit(ROI.position_Y_pass_1(:,1));
-    yshifts_lineROI= yfit(ROI.position_Y_pass_1(:,1));
-    xshiftsROI=repmat(xshifts_lineROI(:),1,size(ROI.position_Y_pass_1,2));
-    yshiftsROI=repmat(yshifts_lineROI(:),1,size(ROI.position_Y_pass_1,2));
+    xshifts_lineROI=xfit(roiPosY(:,1));
+    yshifts_lineROI= yfit(roiPosY(:,1));
+    xshiftsROI=repmat(xshifts_lineROI(:),1,size(roiPosY,2));
+    yshiftsROI=repmat(yshifts_lineROI(:),1,size(roiPosY,2));
     
     
     % for entire image
@@ -125,39 +131,39 @@ switch fitfunc
     
     case 'projective'
     %remove values with NaN XCF height
-    ROI.Shift_X_1=ROI.Shift_X_1(~isnan(CCmax_1));
-    ROI.Shift_Y_1=ROI.Shift_Y_1(~isnan(CCmax_1));
+    xShiftsXcf=xShiftsXcf(~isnan(CCmax_1));
+    yShiftsXcf=yShiftsXcf(~isnan(CCmax_1));
 %     CCmax=CCmax_1(~isnan(CCmax_1));
-    ROI.position_X_pass_1=ROI.position_X_pass_1(~isnan(CCmax_1));
-    ROI.position_Y_pass_1=ROI.position_Y_pass_1(~isnan(CCmax_1));
+    roiPosX=roiPosX(~isnan(CCmax_1));
+    roiPosY=roiPosY(~isnan(CCmax_1));
     
     % calculate best fit
-    zeromat=zeros(numel(ROI.position_X_pass_1),1);
+    zeromat=zeros(numel(roiPosX),1);
     onesmat=zeromat+1;
     
-    lhs_mat=[ROI.position_X_pass_1(:), ROI.position_Y_pass_1(:),onesmat(:), ...
+    lhs_mat=[roiPosX(:), roiPosY(:),onesmat(:), ...
         zeromat(:), zeromat(:), zeromat(:), ...
-        -(ROI.position_X_pass_1(:).*(ROI.position_X_pass_1(:)-ROI.Shift_X_1(:))) ...
-        -(ROI.position_Y_pass_1(:).*(ROI.position_X_pass_1(:)-ROI.Shift_X_1(:)));
+        -(roiPosX(:).*(roiPosX(:)-xShiftsXcf(:))) ...
+        -(roiPosY(:).*(roiPosX(:)-xShiftsXcf(:)));
         
         zeromat(:), zeromat(:), zeromat(:),...
-        ROI.position_X_pass_1(:), ROI.position_Y_pass_1(:), onesmat(:), ...
-        -(ROI.position_X_pass_1(:).*(ROI.position_Y_pass_1(:)-ROI.Shift_Y_1(:))) ...
-        -(ROI.position_Y_pass_1(:).*(ROI.position_Y_pass_1(:)-ROI.Shift_Y_1(:)))];
+        roiPosX(:), roiPosY(:), onesmat(:), ...
+        -(roiPosX(:).*(roiPosY(:)-yShiftsXcf(:))) ...
+        -(roiPosY(:).*(roiPosY(:)-yShiftsXcf(:)))];
     
-    rhs_mat=[(ROI.position_X_pass_1(:)-ROI.Shift_X_1(:));
-        (ROI.position_Y_pass_1(:)-ROI.Shift_Y_1(:))];
+    rhs_mat=[(roiPosX(:)-xShiftsXcf(:));
+        (roiPosY(:)-yShiftsXcf(:))];
     
     [rottrans_mat,~] = robustfit(lhs_mat,rhs_mat,'bisquare',4.685,0); %like wmd solution
     rottrans_mat=reshape([rottrans_mat(:);1],3,3)';
     
     %for quiver plot
-    onesmatgrid=ones(size(ROI.position_X_pass_1));
-    transgridROI=rottrans_mat*([ROI.position_X_pass_1(:) ROI.position_Y_pass_1(:) onesmatgrid(:)])';
-    transgridxROI=reshape(transgridROI(1,:),size(ROI.position_X_pass_1,1),size(ROI.position_X_pass_1,2));
-    transgridyROI=reshape(transgridROI(2,:),size(ROI.position_X_pass_1,1),size(ROI.position_X_pass_1,2));
-    xshiftsROI=ROI.position_X_pass_1-transgridxROI;
-    yshiftsROI=ROI.position_Y_pass_1-transgridyROI;
+    onesmatgrid=ones(size(roiPosX));
+    transgridROI=rottrans_mat*([roiPosX(:) roiPosY(:) onesmatgrid(:)])';
+    transgridxROI=reshape(transgridROI(1,:),size(roiPosX,1),size(roiPosX,2));
+    transgridyROI=reshape(transgridROI(2,:),size(roiPosX,1),size(roiPosX,2));
+    xshiftsROI=roiPosX-transgridxROI;
+    yshiftsROI=roiPosY-transgridyROI;
     
     % for entire image
     [Xpixels,Ypixels]=meshgrid(1:size(Image_ref,2),1:size(Image_ref,1)); %Data grid
@@ -172,17 +178,17 @@ switch fitfunc
     case 'interpolate'
 
     %remove values with NaN XCF height
-    ROI.Shift_X_1=ROI.Shift_X_1(~isnan(CCmax_1));
-    ROI.Shift_Y_1=ROI.Shift_Y_1(~isnan(CCmax_1));
-    ROI.position_X_pass_1=ROI.position_X_pass_1(~isnan(CCmax_1));
-    ROI.position_Y_pass_1=ROI.position_Y_pass_1(~isnan(CCmax_1));
+    xShiftsXcf=xShiftsXcf(~isnan(CCmax_1));
+    yShiftsXcf=yShiftsXcf(~isnan(CCmax_1));
+    roiPosX=roiPosX(~isnan(CCmax_1));
+    roiPosY=roiPosY(~isnan(CCmax_1));
     CCmax=CCmax_1(~isnan(CCmax_1));
 
     % normalise data to avoid scaling artefacts in scatteredInterpolant
-    [xPosNorm,cXP,sXP] = normalize(ROI.position_X_pass_1(:));
-    [yPosNorm,cYP,sYP] = normalize(ROI.position_Y_pass_1(:));
-    [xShiftNorm,cXS,sXS] = normalize(ROI.Shift_X_1(:));
-    [yShiftNorm,cYS,sYS] = normalize(ROI.Shift_Y_1(:));
+    [xPosNorm,cXP,sXP] = normalize(roiPosX(:));
+    [yPosNorm,cYP,sYP] = normalize(roiPosY(:));
+    [xShiftNorm,cXS,sXS] = normalize(xShiftsXcf(:));
+    [yShiftNorm,cYS,sYS] = normalize(yShiftsXcf(:));
     % scale/centring values to undo the normalisation later:
     % N = (A - C) ./ S
     % A = N .* S + C
@@ -191,7 +197,7 @@ switch fitfunc
     xsurf = scatteredInterpolant([xPosNorm,yPosNorm],xShiftNorm,'natural','linear');
     % no need to compute this twice at the same grid points -- copy and
     % overwrite with Shift_X_1 values instead
-    % % ysurf = scatteredInterpolant([ROI.position_X_pass_1(:),ROI.position_Y_pass_1(:)],ROI.Shift_Y_1(:),'natural','linear');%don't do this
+    % % ysurf = scatteredInterpolant([roiPosX(:),roiPosY(:)],yShiftsXcf(:),'natural','linear');%don't do this
     ysurf = xsurf; ysurf.Values=yShiftNorm;
 
     %for quiver plot
@@ -214,19 +220,19 @@ switch fitfunc
     
     otherwise
     %remove values with NaN XCF height
-    ROI.Shift_X_1=ROI.Shift_X_1(~isnan(CCmax_1));
-    ROI.Shift_Y_1=ROI.Shift_Y_1(~isnan(CCmax_1));
+    xShiftsXcf=xShiftsXcf(~isnan(CCmax_1));
+    yShiftsXcf=yShiftsXcf(~isnan(CCmax_1));
 %     CCmax=CCmax_1(~isnan(CCmax_1));
-    ROI.position_X_pass_1=ROI.position_X_pass_1(~isnan(CCmax_1));
-    ROI.position_Y_pass_1=ROI.position_Y_pass_1(~isnan(CCmax_1));
+    roiPosX=roiPosX(~isnan(CCmax_1));
+    roiPosY=roiPosY(~isnan(CCmax_1));
     
     % calculate best fit
-    [xsurf, ~]=fit([ROI.position_X_pass_1(:),ROI.position_Y_pass_1(:)],ROI.Shift_X_1(:),fitfunc);
-    [ysurf, ~]=fit([ROI.position_X_pass_1(:),ROI.position_Y_pass_1(:)],ROI.Shift_Y_1(:),fitfunc);
+    [xsurf, ~]=fit([roiPosX(:),roiPosY(:)],xShiftsXcf(:),fitfunc);
+    [ysurf, ~]=fit([roiPosX(:),roiPosY(:)],yShiftsXcf(:),fitfunc);
     
     %for quiver plot
-    xshiftsROI=xsurf(ROI.position_X_pass_1,ROI.position_Y_pass_1);
-    yshiftsROI=ysurf(ROI.position_X_pass_1,ROI.position_Y_pass_1);
+    xshiftsROI=xsurf(roiPosX,roiPosY);
+    yshiftsROI=ysurf(roiPosX,roiPosY);
     
     % for entire image
     [Xpixels,Ypixels]=meshgrid(1:size(Image_ref,2),1:size(Image_ref,1)); %pixel grid in reference frame
@@ -236,21 +242,15 @@ switch fitfunc
 end
 
 %% Pack outputs
-disp(['Mean X-shift length ' num2str(mean(abs(ROI.Shift_X_1(:)))) ' pixels']);
-disp(['Mean Y-shift length ' num2str(mean(abs(ROI.Shift_Y_1(:)))) ' pixels']);
-disp(['Mean shift length ' num2str(mean(sqrt(abs(ROI.Shift_X_1(:).^2+abs(ROI.Shift_Y_1(:).^2))))) ' pixels']);
+disp(['Mean X-shift length ' num2str(mean(abs(xShiftsXcf(:)))) ' pixels']);
+disp(['Mean Y-shift length ' num2str(mean(abs(yShiftsXcf(:)))) ' pixels']);
+disp(['Mean shift length ' num2str(mean(sqrt(abs(xShiftsXcf(:).^2+abs(yShiftsXcf(:).^2))))) ' pixels']);
 
-% convert to lengths
-pix2um = @(dxy,outPix) dxy*outPix;
 % create pairShifts object
+% but first convert shifts from pixels to um lengths
+pix2um = @(dxy,outPix) dxy*outPix;
 RegOutput = pairShifts(...
     pix2um(dx,xshifts),   pix2um(dy,yshifts),...
     pix2um(dx,xshiftsROI),pix2um(dy,yshiftsROI),...
-    ROI);
-% RegOutput.x= xshifts;
-% RegOutput.y = yshifts;
-% RegOutput.xshiftsROI= xshiftsROI;
-% RegOutput.yshiftsROI = yshiftsROI;
-% RegOutput.ROI = ROI;
-
-
+    pix2um(dx,xShiftsXcf),   pix2um(dy,yShiftsXcf),...
+    roiPosX, roiPosY, roiSize, dx, dy);
