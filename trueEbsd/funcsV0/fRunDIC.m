@@ -31,9 +31,9 @@ ROI.num_pass_1 = roiNum;
 try
     [xShiftsXcf,yShiftsXcf,CCmax_1] = fDIC_xcf_mat_mex(Image_ref,Image_test,ROI,Filters_setting,250,hfilter,FFTfilter);
 catch
+    warning('Mex file error in fDIC_xcf_mat_mex. Check the mex file for your operating system. Mex file compiled using MATLAB version 2025a.');
     % %replace with the next line if fDIC_xcf_mat_mex doesn't work
     [xShiftsXcf,yShiftsXcf,CCmax_1] = fDIC_xcf_mat(Image_ref,Image_test,ROI,Filters_setting,250,hfilter,FFTfilter);
-    warning('Mex file error in fDIC_xcf_mat_mex. Check the mex file for your operating system. Mex file compiled using MATLAB version 2025a.');
 end
 %% fit a surface to the shift vector
 % figure, imagesc(xShiftsXcf); axis equal; caxis([-15 -5]);

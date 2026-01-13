@@ -43,7 +43,7 @@ if nargin>1
 end
 if ~(pixelsize>0) %0 or nan    
     pixelsize = min([job.imgList.dx]);
-    warning(['using default pixel size of ' num2str(pixelsize) ' um, minimum from imgList']);
+    disp(append("using default pixel size of ", num2str(pixelsize), " um, minimum from imgList"));
 end
 
 

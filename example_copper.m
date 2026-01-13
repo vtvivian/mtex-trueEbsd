@@ -374,8 +374,8 @@ ebsdCopper.how2plot=ebsd.how2plot;
 try  %function may be only available in mtex fork vtvivian
     grains = boundaryContours(grains);
 catch 
-    warning("Skipped g.b. redrawing function boundaryContours(grains). " + ...
-        "Expect +-0.1% change to GB/TP void pixels classifications.")
+    disp(append("Skipped g.b. redrawing function boundaryContours(grains). ", ...
+        "Expect +-0.1% change to GB/TP void pixels classifications."))
 end
 % explicitly specify copper-copper boundaries to exclude map border
 gBs = grains.boundary('Copper','Copper');
