@@ -20,10 +20,10 @@
            gitdir = ['--git-dir=' char(gitdir) '/.git'];
        end
 
-       [~, hashout] = system(['TERM=xterm git ' gitdir ...
-                           ' log -n 1 --no-color --pretty=format:''%H'' ''' ...
+       [~, hashout] = system(['TERM=ansi git ' gitdir ...
+                           ' log -n 1 --no-color --pretty=format:''%h%d'' ''' ...
                            fname ''' < /dev/null']);
 
        % remove bash escape characters
-       hash = hashout(9:48);
+       hash = strip(hashout(1:end-9));
    end
