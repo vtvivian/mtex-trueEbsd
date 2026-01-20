@@ -1,0 +1,146 @@
+[
+  {
+    "directory": "D:\\RockShare\\Work\\Projects\\2025_Contiguity_SECO\\Technical\\standalone-app-2.0\\mtex-trueEbsd-2.0.0\\funcsV0\\codegen\\codegen\\mex\\fDIC_xcf_mat",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2025a\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"D:\\RockShare\\Work\\Projects\\2025_Contiguity_SECO\\Technical\\standalone-app-2.0\\mtex-trueEbsd-2.0.0\\funcsV0\\codegen\\codegen\\mex\\fDIC_xcf_mat\" -I \"D:\\RockShare\\Work\\Projects\\2025_Contiguity_SECO\\Technical\\standalone-app-2.0\\mtex-trueEbsd-2.0.0\\funcsV0\\codegen\" -I \"D:\\RockShare\\Work\\Projects\\2025_Contiguity_SECO\\Technical\\standalone-app-2.0\\mtex-trueEbsd-2.0.0\\funcsV0\\codegen\\codegen\\mex\\fDIC_xcf_mat\\interface\" -I \"C:\\Program Files\\MATLAB\\R2025a\\extern\\include\" -I \".\" -DMODEL=fDIC_xcf_mat_mex -D__USE_MINGW_ANSI_STDIO=1 -msse2 -fno-predictive-commoning -Wno-stringop-overflow -Wno-maybe-uninitialized -fopenmp  fDIC_xcf_mat_data.c -o build/win64/fDIC_xcf_mat_data.o",
+    "file": "fDIC_xcf_mat_data.c",
+    "output": "build/win64/fDIC_xcf_mat_data.o"
+  },
+  {
+    "directory": "D:\\RockShare\\Work\\Projects\\2025_Contiguity_SECO\\Technical\\standalone-app-2.0\\mtex-trueEbsd-2.0.0\\funcsV0\\codegen\\codegen\\mex\\fDIC_xcf_mat",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2025a\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"D:\\RockShare\\Work\\Projects\\2025_Contiguity_SECO\\Technical\\standalone-app-2.0\\mtex-trueEbsd-2.0.0\\funcsV0\\codegen\\codegen\\mex\\fDIC_xcf_mat\" -I \"D:\\RockShare\\Work\\Projects\\2025_Contiguity_SECO\\Technical\\standalone-app-2.0\\mtex-trueEbsd-2.0.0\\funcsV0\\codegen\" -I \"D:\\RockShare\\Work\\Projects\\2025_Contiguity_SECO\\Technical\\standalone-app-2.0\\mtex-trueEbsd-2.0.0\\funcsV0\\codegen\\codegen\\mex\\fDIC_xcf_mat\\interface\" -I \"C:\\Program Files\\MATLAB\\R2025a\\extern\\include\" -I \".\" -DMODEL=fDIC_xcf_mat_mex -D__USE_MINGW_ANSI_STDIO=1 -msse2 -fno-predictive-commoning -Wno-stringop-overflow -Wno-maybe-uninitialized -fopenmp  rt_nonfinite.c -o build/win64/rt_nonfinite.o",
+    "file": "rt_nonfinite.c",
+    "output": "build/win64/rt_nonfinite.o"
+  },
+  {
+    "directory": "D:\\RockShare\\Work\\Projects\\2025_Contiguity_SECO\\Technical\\standalone-app-2.0\\mtex-trueEbsd-2.0.0\\funcsV0\\codegen\\codegen\\mex\\fDIC_xcf_mat",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2025a\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"D:\\RockShare\\Work\\Projects\\2025_Contiguity_SECO\\Technical\\standalone-app-2.0\\mtex-trueEbsd-2.0.0\\funcsV0\\codegen\\codegen\\mex\\fDIC_xcf_mat\" -I \"D:\\RockShare\\Work\\Projects\\2025_Contiguity_SECO\\Technical\\standalone-app-2.0\\mtex-trueEbsd-2.0.0\\funcsV0\\codegen\" -I \"D:\\RockShare\\Work\\Projects\\2025_Contiguity_SECO\\Technical\\standalone-app-2.0\\mtex-trueEbsd-2.0.0\\funcsV0\\codegen\\codegen\\mex\\fDIC_xcf_mat\\interface\" -I \"C:\\Program Files\\MATLAB\\R2025a\\extern\\include\" -I \".\" -DMODEL=fDIC_xcf_mat_mex -D__USE_MINGW_ANSI_STDIO=1 -msse2 -fno-predictive-commoning -Wno-stringop-overflow -Wno-maybe-uninitialized -fopenmp  fDIC_xcf_mat_initialize.c -o build/win64/fDIC_xcf_mat_initialize.o",
+    "file": "fDIC_xcf_mat_initialize.c",
+    "output": "build/win64/fDIC_xcf_mat_initialize.o"
+  },
+  {
+    "directory": "D:\\RockShare\\Work\\Projects\\2025_Contiguity_SECO\\Technical\\standalone-app-2.0\\mtex-trueEbsd-2.0.0\\funcsV0\\codegen\\codegen\\mex\\fDIC_xcf_mat",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2025a\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"D:\\RockShare\\Work\\Projects\\2025_Contiguity_SECO\\Technical\\standalone-app-2.0\\mtex-trueEbsd-2.0.0\\funcsV0\\codegen\\codegen\\mex\\fDIC_xcf_mat\" -I \"D:\\RockShare\\Work\\Projects\\2025_Contiguity_SECO\\Technical\\standalone-app-2.0\\mtex-trueEbsd-2.0.0\\funcsV0\\codegen\" -I \"D:\\RockShare\\Work\\Projects\\2025_Contiguity_SECO\\Technical\\standalone-app-2.0\\mtex-trueEbsd-2.0.0\\funcsV0\\codegen\\codegen\\mex\\fDIC_xcf_mat\\interface\" -I \"C:\\Program Files\\MATLAB\\R2025a\\extern\\include\" -I \".\" -DMODEL=fDIC_xcf_mat_mex -D__USE_MINGW_ANSI_STDIO=1 -msse2 -fno-predictive-commoning -Wno-stringop-overflow -Wno-maybe-uninitialized -fopenmp  fDIC_xcf_mat_terminate.c -o build/win64/fDIC_xcf_mat_terminate.o",
+    "file": "fDIC_xcf_mat_terminate.c",
+    "output": "build/win64/fDIC_xcf_mat_terminate.o"
+  },
+  {
+    "directory": "D:\\RockShare\\Work\\Projects\\2025_Contiguity_SECO\\Technical\\standalone-app-2.0\\mtex-trueEbsd-2.0.0\\funcsV0\\codegen\\codegen\\mex\\fDIC_xcf_mat",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2025a\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"D:\\RockShare\\Work\\Projects\\2025_Contiguity_SECO\\Technical\\standalone-app-2.0\\mtex-trueEbsd-2.0.0\\funcsV0\\codegen\\codegen\\mex\\fDIC_xcf_mat\" -I \"D:\\RockShare\\Work\\Projects\\2025_Contiguity_SECO\\Technical\\standalone-app-2.0\\mtex-trueEbsd-2.0.0\\funcsV0\\codegen\" -I \"D:\\RockShare\\Work\\Projects\\2025_Contiguity_SECO\\Technical\\standalone-app-2.0\\mtex-trueEbsd-2.0.0\\funcsV0\\codegen\\codegen\\mex\\fDIC_xcf_mat\\interface\" -I \"C:\\Program Files\\MATLAB\\R2025a\\extern\\include\" -I \".\" -DMODEL=fDIC_xcf_mat_mex -D__USE_MINGW_ANSI_STDIO=1 -msse2 -fno-predictive-commoning -Wno-stringop-overflow -Wno-maybe-uninitialized -fopenmp  fDIC_xcf_mat.c -o build/win64/fDIC_xcf_mat.o",
+    "file": "fDIC_xcf_mat.c",
+    "output": "build/win64/fDIC_xcf_mat.o"
+  },
+  {
+    "directory": "D:\\RockShare\\Work\\Projects\\2025_Contiguity_SECO\\Technical\\standalone-app-2.0\\mtex-trueEbsd-2.0.0\\funcsV0\\codegen\\codegen\\mex\\fDIC_xcf_mat",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2025a\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"D:\\RockShare\\Work\\Projects\\2025_Contiguity_SECO\\Technical\\standalone-app-2.0\\mtex-trueEbsd-2.0.0\\funcsV0\\codegen\\codegen\\mex\\fDIC_xcf_mat\" -I \"D:\\RockShare\\Work\\Projects\\2025_Contiguity_SECO\\Technical\\standalone-app-2.0\\mtex-trueEbsd-2.0.0\\funcsV0\\codegen\" -I \"D:\\RockShare\\Work\\Projects\\2025_Contiguity_SECO\\Technical\\standalone-app-2.0\\mtex-trueEbsd-2.0.0\\funcsV0\\codegen\\codegen\\mex\\fDIC_xcf_mat\\interface\" -I \"C:\\Program Files\\MATLAB\\R2025a\\extern\\include\" -I \".\" -DMODEL=fDIC_xcf_mat_mex -D__USE_MINGW_ANSI_STDIO=1 -msse2 -fno-predictive-commoning -Wno-stringop-overflow -Wno-maybe-uninitialized -fopenmp  blockedSummation.c -o build/win64/blockedSummation.o",
+    "file": "blockedSummation.c",
+    "output": "build/win64/blockedSummation.o"
+  },
+  {
+    "directory": "D:\\RockShare\\Work\\Projects\\2025_Contiguity_SECO\\Technical\\standalone-app-2.0\\mtex-trueEbsd-2.0.0\\funcsV0\\codegen\\codegen\\mex\\fDIC_xcf_mat",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2025a\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"D:\\RockShare\\Work\\Projects\\2025_Contiguity_SECO\\Technical\\standalone-app-2.0\\mtex-trueEbsd-2.0.0\\funcsV0\\codegen\\codegen\\mex\\fDIC_xcf_mat\" -I \"D:\\RockShare\\Work\\Projects\\2025_Contiguity_SECO\\Technical\\standalone-app-2.0\\mtex-trueEbsd-2.0.0\\funcsV0\\codegen\" -I \"D:\\RockShare\\Work\\Projects\\2025_Contiguity_SECO\\Technical\\standalone-app-2.0\\mtex-trueEbsd-2.0.0\\funcsV0\\codegen\\codegen\\mex\\fDIC_xcf_mat\\interface\" -I \"C:\\Program Files\\MATLAB\\R2025a\\extern\\include\" -I \".\" -DMODEL=fDIC_xcf_mat_mex -D__USE_MINGW_ANSI_STDIO=1 -msse2 -fno-predictive-commoning -Wno-stringop-overflow -Wno-maybe-uninitialized -fopenmp  sumMatrixIncludeNaN.c -o build/win64/sumMatrixIncludeNaN.o",
+    "file": "sumMatrixIncludeNaN.c",
+    "output": "build/win64/sumMatrixIncludeNaN.o"
+  },
+  {
+    "directory": "D:\\RockShare\\Work\\Projects\\2025_Contiguity_SECO\\Technical\\standalone-app-2.0\\mtex-trueEbsd-2.0.0\\funcsV0\\codegen\\codegen\\mex\\fDIC_xcf_mat",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2025a\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"D:\\RockShare\\Work\\Projects\\2025_Contiguity_SECO\\Technical\\standalone-app-2.0\\mtex-trueEbsd-2.0.0\\funcsV0\\codegen\\codegen\\mex\\fDIC_xcf_mat\" -I \"D:\\RockShare\\Work\\Projects\\2025_Contiguity_SECO\\Technical\\standalone-app-2.0\\mtex-trueEbsd-2.0.0\\funcsV0\\codegen\" -I \"D:\\RockShare\\Work\\Projects\\2025_Contiguity_SECO\\Technical\\standalone-app-2.0\\mtex-trueEbsd-2.0.0\\funcsV0\\codegen\\codegen\\mex\\fDIC_xcf_mat\\interface\" -I \"C:\\Program Files\\MATLAB\\R2025a\\extern\\include\" -I \".\" -DMODEL=fDIC_xcf_mat_mex -D__USE_MINGW_ANSI_STDIO=1 -msse2 -fno-predictive-commoning -Wno-stringop-overflow -Wno-maybe-uninitialized -fopenmp  std.c -o build/win64/std.o",
+    "file": "std.c",
+    "output": "build/win64/std.o"
+  },
+  {
+    "directory": "D:\\RockShare\\Work\\Projects\\2025_Contiguity_SECO\\Technical\\standalone-app-2.0\\mtex-trueEbsd-2.0.0\\funcsV0\\codegen\\codegen\\mex\\fDIC_xcf_mat",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2025a\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"D:\\RockShare\\Work\\Projects\\2025_Contiguity_SECO\\Technical\\standalone-app-2.0\\mtex-trueEbsd-2.0.0\\funcsV0\\codegen\\codegen\\mex\\fDIC_xcf_mat\" -I \"D:\\RockShare\\Work\\Projects\\2025_Contiguity_SECO\\Technical\\standalone-app-2.0\\mtex-trueEbsd-2.0.0\\funcsV0\\codegen\" -I \"D:\\RockShare\\Work\\Projects\\2025_Contiguity_SECO\\Technical\\standalone-app-2.0\\mtex-trueEbsd-2.0.0\\funcsV0\\codegen\\codegen\\mex\\fDIC_xcf_mat\\interface\" -I \"C:\\Program Files\\MATLAB\\R2025a\\extern\\include\" -I \".\" -DMODEL=fDIC_xcf_mat_mex -D__USE_MINGW_ANSI_STDIO=1 -msse2 -fno-predictive-commoning -Wno-stringop-overflow -Wno-maybe-uninitialized -fopenmp  fft2.c -o build/win64/fft2.o",
+    "file": "fft2.c",
+    "output": "build/win64/fft2.o"
+  },
+  {
+    "directory": "D:\\RockShare\\Work\\Projects\\2025_Contiguity_SECO\\Technical\\standalone-app-2.0\\mtex-trueEbsd-2.0.0\\funcsV0\\codegen\\codegen\\mex\\fDIC_xcf_mat",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2025a\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"D:\\RockShare\\Work\\Projects\\2025_Contiguity_SECO\\Technical\\standalone-app-2.0\\mtex-trueEbsd-2.0.0\\funcsV0\\codegen\\codegen\\mex\\fDIC_xcf_mat\" -I \"D:\\RockShare\\Work\\Projects\\2025_Contiguity_SECO\\Technical\\standalone-app-2.0\\mtex-trueEbsd-2.0.0\\funcsV0\\codegen\" -I \"D:\\RockShare\\Work\\Projects\\2025_Contiguity_SECO\\Technical\\standalone-app-2.0\\mtex-trueEbsd-2.0.0\\funcsV0\\codegen\\codegen\\mex\\fDIC_xcf_mat\\interface\" -I \"C:\\Program Files\\MATLAB\\R2025a\\extern\\include\" -I \".\" -DMODEL=fDIC_xcf_mat_mex -D__USE_MINGW_ANSI_STDIO=1 -msse2 -fno-predictive-commoning -Wno-stringop-overflow -Wno-maybe-uninitialized -fopenmp  fReg.c -o build/win64/fReg.o",
+    "file": "fReg.c",
+    "output": "build/win64/fReg.o"
+  },
+  {
+    "directory": "D:\\RockShare\\Work\\Projects\\2025_Contiguity_SECO\\Technical\\standalone-app-2.0\\mtex-trueEbsd-2.0.0\\funcsV0\\codegen\\codegen\\mex\\fDIC_xcf_mat",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2025a\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"D:\\RockShare\\Work\\Projects\\2025_Contiguity_SECO\\Technical\\standalone-app-2.0\\mtex-trueEbsd-2.0.0\\funcsV0\\codegen\\codegen\\mex\\fDIC_xcf_mat\" -I \"D:\\RockShare\\Work\\Projects\\2025_Contiguity_SECO\\Technical\\standalone-app-2.0\\mtex-trueEbsd-2.0.0\\funcsV0\\codegen\" -I \"D:\\RockShare\\Work\\Projects\\2025_Contiguity_SECO\\Technical\\standalone-app-2.0\\mtex-trueEbsd-2.0.0\\funcsV0\\codegen\\codegen\\mex\\fDIC_xcf_mat\\interface\" -I \"C:\\Program Files\\MATLAB\\R2025a\\extern\\include\" -I \".\" -DMODEL=fDIC_xcf_mat_mex -D__USE_MINGW_ANSI_STDIO=1 -msse2 -fno-predictive-commoning -Wno-stringop-overflow -Wno-maybe-uninitialized -fopenmp  ifft2.c -o build/win64/ifft2.o",
+    "file": "ifft2.c",
+    "output": "build/win64/ifft2.o"
+  },
+  {
+    "directory": "D:\\RockShare\\Work\\Projects\\2025_Contiguity_SECO\\Technical\\standalone-app-2.0\\mtex-trueEbsd-2.0.0\\funcsV0\\codegen\\codegen\\mex\\fDIC_xcf_mat",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2025a\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"D:\\RockShare\\Work\\Projects\\2025_Contiguity_SECO\\Technical\\standalone-app-2.0\\mtex-trueEbsd-2.0.0\\funcsV0\\codegen\\codegen\\mex\\fDIC_xcf_mat\" -I \"D:\\RockShare\\Work\\Projects\\2025_Contiguity_SECO\\Technical\\standalone-app-2.0\\mtex-trueEbsd-2.0.0\\funcsV0\\codegen\" -I \"D:\\RockShare\\Work\\Projects\\2025_Contiguity_SECO\\Technical\\standalone-app-2.0\\mtex-trueEbsd-2.0.0\\funcsV0\\codegen\\codegen\\mex\\fDIC_xcf_mat\\interface\" -I \"C:\\Program Files\\MATLAB\\R2025a\\extern\\include\" -I \".\" -DMODEL=fDIC_xcf_mat_mex -D__USE_MINGW_ANSI_STDIO=1 -msse2 -fno-predictive-commoning -Wno-stringop-overflow -Wno-maybe-uninitialized -fopenmp  relop.c -o build/win64/relop.o",
+    "file": "relop.c",
+    "output": "build/win64/relop.o"
+  },
+  {
+    "directory": "D:\\RockShare\\Work\\Projects\\2025_Contiguity_SECO\\Technical\\standalone-app-2.0\\mtex-trueEbsd-2.0.0\\funcsV0\\codegen\\codegen\\mex\\fDIC_xcf_mat",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2025a\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"D:\\RockShare\\Work\\Projects\\2025_Contiguity_SECO\\Technical\\standalone-app-2.0\\mtex-trueEbsd-2.0.0\\funcsV0\\codegen\\codegen\\mex\\fDIC_xcf_mat\" -I \"D:\\RockShare\\Work\\Projects\\2025_Contiguity_SECO\\Technical\\standalone-app-2.0\\mtex-trueEbsd-2.0.0\\funcsV0\\codegen\" -I \"D:\\RockShare\\Work\\Projects\\2025_Contiguity_SECO\\Technical\\standalone-app-2.0\\mtex-trueEbsd-2.0.0\\funcsV0\\codegen\\codegen\\mex\\fDIC_xcf_mat\\interface\" -I \"C:\\Program Files\\MATLAB\\R2025a\\extern\\include\" -I \".\" -DMODEL=fDIC_xcf_mat_mex -D__USE_MINGW_ANSI_STDIO=1 -msse2 -fno-predictive-commoning -Wno-stringop-overflow -Wno-maybe-uninitialized -fopenmp  indexShapeCheck.c -o build/win64/indexShapeCheck.o",
+    "file": "indexShapeCheck.c",
+    "output": "build/win64/indexShapeCheck.o"
+  },
+  {
+    "directory": "D:\\RockShare\\Work\\Projects\\2025_Contiguity_SECO\\Technical\\standalone-app-2.0\\mtex-trueEbsd-2.0.0\\funcsV0\\codegen\\codegen\\mex\\fDIC_xcf_mat",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2025a\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"D:\\RockShare\\Work\\Projects\\2025_Contiguity_SECO\\Technical\\standalone-app-2.0\\mtex-trueEbsd-2.0.0\\funcsV0\\codegen\\codegen\\mex\\fDIC_xcf_mat\" -I \"D:\\RockShare\\Work\\Projects\\2025_Contiguity_SECO\\Technical\\standalone-app-2.0\\mtex-trueEbsd-2.0.0\\funcsV0\\codegen\" -I \"D:\\RockShare\\Work\\Projects\\2025_Contiguity_SECO\\Technical\\standalone-app-2.0\\mtex-trueEbsd-2.0.0\\funcsV0\\codegen\\codegen\\mex\\fDIC_xcf_mat\\interface\" -I \"C:\\Program Files\\MATLAB\\R2025a\\extern\\include\" -I \".\" -DMODEL=fDIC_xcf_mat_mex -D__USE_MINGW_ANSI_STDIO=1 -msse2 -fno-predictive-commoning -Wno-stringop-overflow -Wno-maybe-uninitialized -fopenmp  mtimes.c -o build/win64/mtimes.o",
+    "file": "mtimes.c",
+    "output": "build/win64/mtimes.o"
+  },
+  {
+    "directory": "D:\\RockShare\\Work\\Projects\\2025_Contiguity_SECO\\Technical\\standalone-app-2.0\\mtex-trueEbsd-2.0.0\\funcsV0\\codegen\\codegen\\mex\\fDIC_xcf_mat",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2025a\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"D:\\RockShare\\Work\\Projects\\2025_Contiguity_SECO\\Technical\\standalone-app-2.0\\mtex-trueEbsd-2.0.0\\funcsV0\\codegen\\codegen\\mex\\fDIC_xcf_mat\" -I \"D:\\RockShare\\Work\\Projects\\2025_Contiguity_SECO\\Technical\\standalone-app-2.0\\mtex-trueEbsd-2.0.0\\funcsV0\\codegen\" -I \"D:\\RockShare\\Work\\Projects\\2025_Contiguity_SECO\\Technical\\standalone-app-2.0\\mtex-trueEbsd-2.0.0\\funcsV0\\codegen\\codegen\\mex\\fDIC_xcf_mat\\interface\" -I \"C:\\Program Files\\MATLAB\\R2025a\\extern\\include\" -I \".\" -DMODEL=fDIC_xcf_mat_mex -D__USE_MINGW_ANSI_STDIO=1 -msse2 -fno-predictive-commoning -Wno-stringop-overflow -Wno-maybe-uninitialized -fopenmp  assertValidSizeArg.c -o build/win64/assertValidSizeArg.o",
+    "file": "assertValidSizeArg.c",
+    "output": "build/win64/assertValidSizeArg.o"
+  },
+  {
+    "directory": "D:\\RockShare\\Work\\Projects\\2025_Contiguity_SECO\\Technical\\standalone-app-2.0\\mtex-trueEbsd-2.0.0\\funcsV0\\codegen\\codegen\\mex\\fDIC_xcf_mat",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2025a\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"D:\\RockShare\\Work\\Projects\\2025_Contiguity_SECO\\Technical\\standalone-app-2.0\\mtex-trueEbsd-2.0.0\\funcsV0\\codegen\\codegen\\mex\\fDIC_xcf_mat\" -I \"D:\\RockShare\\Work\\Projects\\2025_Contiguity_SECO\\Technical\\standalone-app-2.0\\mtex-trueEbsd-2.0.0\\funcsV0\\codegen\" -I \"D:\\RockShare\\Work\\Projects\\2025_Contiguity_SECO\\Technical\\standalone-app-2.0\\mtex-trueEbsd-2.0.0\\funcsV0\\codegen\\codegen\\mex\\fDIC_xcf_mat\\interface\" -I \"C:\\Program Files\\MATLAB\\R2025a\\extern\\include\" -I \".\" -DMODEL=fDIC_xcf_mat_mex -D__USE_MINGW_ANSI_STDIO=1 -msse2 -fno-predictive-commoning -Wno-stringop-overflow -Wno-maybe-uninitialized -fopenmp  interface/_coder_fDIC_xcf_mat_api.c -o build/win64/_coder_fDIC_xcf_mat_api.o",
+    "file": "interface/_coder_fDIC_xcf_mat_api.c",
+    "output": "build/win64/_coder_fDIC_xcf_mat_api.o"
+  },
+  {
+    "directory": "D:\\RockShare\\Work\\Projects\\2025_Contiguity_SECO\\Technical\\standalone-app-2.0\\mtex-trueEbsd-2.0.0\\funcsV0\\codegen\\codegen\\mex\\fDIC_xcf_mat",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2025a\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"D:\\RockShare\\Work\\Projects\\2025_Contiguity_SECO\\Technical\\standalone-app-2.0\\mtex-trueEbsd-2.0.0\\funcsV0\\codegen\\codegen\\mex\\fDIC_xcf_mat\" -I \"D:\\RockShare\\Work\\Projects\\2025_Contiguity_SECO\\Technical\\standalone-app-2.0\\mtex-trueEbsd-2.0.0\\funcsV0\\codegen\" -I \"D:\\RockShare\\Work\\Projects\\2025_Contiguity_SECO\\Technical\\standalone-app-2.0\\mtex-trueEbsd-2.0.0\\funcsV0\\codegen\\codegen\\mex\\fDIC_xcf_mat\\interface\" -I \"C:\\Program Files\\MATLAB\\R2025a\\extern\\include\" -I \".\" -DMODEL=fDIC_xcf_mat_mex -D__USE_MINGW_ANSI_STDIO=1 -msse2 -fno-predictive-commoning -Wno-stringop-overflow -Wno-maybe-uninitialized -fopenmp  interface/_coder_fDIC_xcf_mat_mex.c -o build/win64/_coder_fDIC_xcf_mat_mex.o",
+    "file": "interface/_coder_fDIC_xcf_mat_mex.c",
+    "output": "build/win64/_coder_fDIC_xcf_mat_mex.o"
+  },
+  {
+    "directory": "D:\\RockShare\\Work\\Projects\\2025_Contiguity_SECO\\Technical\\standalone-app-2.0\\mtex-trueEbsd-2.0.0\\funcsV0\\codegen\\codegen\\mex\\fDIC_xcf_mat",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2025a\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"D:\\RockShare\\Work\\Projects\\2025_Contiguity_SECO\\Technical\\standalone-app-2.0\\mtex-trueEbsd-2.0.0\\funcsV0\\codegen\\codegen\\mex\\fDIC_xcf_mat\" -I \"D:\\RockShare\\Work\\Projects\\2025_Contiguity_SECO\\Technical\\standalone-app-2.0\\mtex-trueEbsd-2.0.0\\funcsV0\\codegen\" -I \"D:\\RockShare\\Work\\Projects\\2025_Contiguity_SECO\\Technical\\standalone-app-2.0\\mtex-trueEbsd-2.0.0\\funcsV0\\codegen\\codegen\\mex\\fDIC_xcf_mat\\interface\" -I \"C:\\Program Files\\MATLAB\\R2025a\\extern\\include\" -I \".\" -DMODEL=fDIC_xcf_mat_mex -D__USE_MINGW_ANSI_STDIO=1 -msse2 -fno-predictive-commoning -Wno-stringop-overflow -Wno-maybe-uninitialized -fopenmp  eml_int_forloop_overflow_check.c -o build/win64/eml_int_forloop_overflow_check.o",
+    "file": "eml_int_forloop_overflow_check.c",
+    "output": "build/win64/eml_int_forloop_overflow_check.o"
+  },
+  {
+    "directory": "D:\\RockShare\\Work\\Projects\\2025_Contiguity_SECO\\Technical\\standalone-app-2.0\\mtex-trueEbsd-2.0.0\\funcsV0\\codegen\\codegen\\mex\\fDIC_xcf_mat",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2025a\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"D:\\RockShare\\Work\\Projects\\2025_Contiguity_SECO\\Technical\\standalone-app-2.0\\mtex-trueEbsd-2.0.0\\funcsV0\\codegen\\codegen\\mex\\fDIC_xcf_mat\" -I \"D:\\RockShare\\Work\\Projects\\2025_Contiguity_SECO\\Technical\\standalone-app-2.0\\mtex-trueEbsd-2.0.0\\funcsV0\\codegen\" -I \"D:\\RockShare\\Work\\Projects\\2025_Contiguity_SECO\\Technical\\standalone-app-2.0\\mtex-trueEbsd-2.0.0\\funcsV0\\codegen\\codegen\\mex\\fDIC_xcf_mat\\interface\" -I \"C:\\Program Files\\MATLAB\\R2025a\\extern\\include\" -I \".\" -DMODEL=fDIC_xcf_mat_mex -D__USE_MINGW_ANSI_STDIO=1 -msse2 -fno-predictive-commoning -Wno-stringop-overflow -Wno-maybe-uninitialized -fopenmp  eml_fftshift.c -o build/win64/eml_fftshift.o",
+    "file": "eml_fftshift.c",
+    "output": "build/win64/eml_fftshift.o"
+  },
+  {
+    "directory": "D:\\RockShare\\Work\\Projects\\2025_Contiguity_SECO\\Technical\\standalone-app-2.0\\mtex-trueEbsd-2.0.0\\funcsV0\\codegen\\codegen\\mex\\fDIC_xcf_mat",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2025a\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"D:\\RockShare\\Work\\Projects\\2025_Contiguity_SECO\\Technical\\standalone-app-2.0\\mtex-trueEbsd-2.0.0\\funcsV0\\codegen\\codegen\\mex\\fDIC_xcf_mat\" -I \"D:\\RockShare\\Work\\Projects\\2025_Contiguity_SECO\\Technical\\standalone-app-2.0\\mtex-trueEbsd-2.0.0\\funcsV0\\codegen\" -I \"D:\\RockShare\\Work\\Projects\\2025_Contiguity_SECO\\Technical\\standalone-app-2.0\\mtex-trueEbsd-2.0.0\\funcsV0\\codegen\\codegen\\mex\\fDIC_xcf_mat\\interface\" -I \"C:\\Program Files\\MATLAB\\R2025a\\extern\\include\" -I \".\" -DMODEL=fDIC_xcf_mat_mex -D__USE_MINGW_ANSI_STDIO=1 -msse2 -fno-predictive-commoning -Wno-stringop-overflow -Wno-maybe-uninitialized -fopenmp  ifftshift.c -o build/win64/ifftshift.o",
+    "file": "ifftshift.c",
+    "output": "build/win64/ifftshift.o"
+  },
+  {
+    "directory": "D:\\RockShare\\Work\\Projects\\2025_Contiguity_SECO\\Technical\\standalone-app-2.0\\mtex-trueEbsd-2.0.0\\funcsV0\\codegen\\codegen\\mex\\fDIC_xcf_mat",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2025a\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"D:\\RockShare\\Work\\Projects\\2025_Contiguity_SECO\\Technical\\standalone-app-2.0\\mtex-trueEbsd-2.0.0\\funcsV0\\codegen\\codegen\\mex\\fDIC_xcf_mat\" -I \"D:\\RockShare\\Work\\Projects\\2025_Contiguity_SECO\\Technical\\standalone-app-2.0\\mtex-trueEbsd-2.0.0\\funcsV0\\codegen\" -I \"D:\\RockShare\\Work\\Projects\\2025_Contiguity_SECO\\Technical\\standalone-app-2.0\\mtex-trueEbsd-2.0.0\\funcsV0\\codegen\\codegen\\mex\\fDIC_xcf_mat\\interface\" -I \"C:\\Program Files\\MATLAB\\R2025a\\extern\\include\" -I \".\" -DMODEL=fDIC_xcf_mat_mex -D__USE_MINGW_ANSI_STDIO=1 -msse2 -fno-predictive-commoning -Wno-stringop-overflow -Wno-maybe-uninitialized -fopenmp  exp.c -o build/win64/exp.o",
+    "file": "exp.c",
+    "output": "build/win64/exp.o"
+  },
+  {
+    "directory": "D:\\RockShare\\Work\\Projects\\2025_Contiguity_SECO\\Technical\\standalone-app-2.0\\mtex-trueEbsd-2.0.0\\funcsV0\\codegen\\codegen\\mex\\fDIC_xcf_mat",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2025a\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"D:\\RockShare\\Work\\Projects\\2025_Contiguity_SECO\\Technical\\standalone-app-2.0\\mtex-trueEbsd-2.0.0\\funcsV0\\codegen\\codegen\\mex\\fDIC_xcf_mat\" -I \"D:\\RockShare\\Work\\Projects\\2025_Contiguity_SECO\\Technical\\standalone-app-2.0\\mtex-trueEbsd-2.0.0\\funcsV0\\codegen\" -I \"D:\\RockShare\\Work\\Projects\\2025_Contiguity_SECO\\Technical\\standalone-app-2.0\\mtex-trueEbsd-2.0.0\\funcsV0\\codegen\\codegen\\mex\\fDIC_xcf_mat\\interface\" -I \"C:\\Program Files\\MATLAB\\R2025a\\extern\\include\" -I \".\" -DMODEL=fDIC_xcf_mat_mex -D__USE_MINGW_ANSI_STDIO=1 -msse2 -fno-predictive-commoning -Wno-stringop-overflow -Wno-maybe-uninitialized -fopenmp  fDIC_xcf_mat_emxutil.c -o build/win64/fDIC_xcf_mat_emxutil.o",
+    "file": "fDIC_xcf_mat_emxutil.c",
+    "output": "build/win64/fDIC_xcf_mat_emxutil.o"
+  },
+  {
+    "directory": "D:\\RockShare\\Work\\Projects\\2025_Contiguity_SECO\\Technical\\standalone-app-2.0\\mtex-trueEbsd-2.0.0\\funcsV0\\codegen\\codegen\\mex\\fDIC_xcf_mat",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2025a\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"D:\\RockShare\\Work\\Projects\\2025_Contiguity_SECO\\Technical\\standalone-app-2.0\\mtex-trueEbsd-2.0.0\\funcsV0\\codegen\\codegen\\mex\\fDIC_xcf_mat\" -I \"D:\\RockShare\\Work\\Projects\\2025_Contiguity_SECO\\Technical\\standalone-app-2.0\\mtex-trueEbsd-2.0.0\\funcsV0\\codegen\" -I \"D:\\RockShare\\Work\\Projects\\2025_Contiguity_SECO\\Technical\\standalone-app-2.0\\mtex-trueEbsd-2.0.0\\funcsV0\\codegen\\codegen\\mex\\fDIC_xcf_mat\\interface\" -I \"C:\\Program Files\\MATLAB\\R2025a\\extern\\include\" -I \".\" -DMODEL=fDIC_xcf_mat_mex -D__USE_MINGW_ANSI_STDIO=1 -msse2 -fno-predictive-commoning -Wno-stringop-overflow -Wno-maybe-uninitialized -fopenmp  interface/_coder_fDIC_xcf_mat_info.c -o build/win64/_coder_fDIC_xcf_mat_info.o",
+    "file": "interface/_coder_fDIC_xcf_mat_info.c",
+    "output": "build/win64/_coder_fDIC_xcf_mat_info.o"
+  },
+  {
+    "directory": "D:\\RockShare\\Work\\Projects\\2025_Contiguity_SECO\\Technical\\standalone-app-2.0\\mtex-trueEbsd-2.0.0\\funcsV0\\codegen\\codegen\\mex\\fDIC_xcf_mat",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2025a\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"D:\\RockShare\\Work\\Projects\\2025_Contiguity_SECO\\Technical\\standalone-app-2.0\\mtex-trueEbsd-2.0.0\\funcsV0\\codegen\\codegen\\mex\\fDIC_xcf_mat\" -I \"D:\\RockShare\\Work\\Projects\\2025_Contiguity_SECO\\Technical\\standalone-app-2.0\\mtex-trueEbsd-2.0.0\\funcsV0\\codegen\" -I \"D:\\RockShare\\Work\\Projects\\2025_Contiguity_SECO\\Technical\\standalone-app-2.0\\mtex-trueEbsd-2.0.0\\funcsV0\\codegen\\codegen\\mex\\fDIC_xcf_mat\\interface\" -I \"C:\\Program Files\\MATLAB\\R2025a\\extern\\include\" -I \".\" -DMODEL=fDIC_xcf_mat_mex -D__USE_MINGW_ANSI_STDIO=1 -msse2 -fno-predictive-commoning -Wno-stringop-overflow -Wno-maybe-uninitialized -fopenmp  \"C:/Program Files/MATLAB/R2025a/extern/version/c_mexapi_version.c\" -o build/win64/c_mexapi_version.o",
+    "file": "C:/Program Files/MATLAB/R2025a/extern/version/c_mexapi_version.c",
+    "output": "build/win64/c_mexapi_version.o"
+  }
+]
