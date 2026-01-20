@@ -1,0 +1,23 @@
+LIBRARY fDIC_xcf_mat.mexw64
+EXPORTS
+mexFunction
+mexfilerequiredapiversion
+emlrtMexFcnProperties
+fDIC_xcf_mat
+fDIC_xcf_mat_initialize
+fDIC_xcf_mat_terminate
+fDIC_xcf_mat_atexit
+emxEnsureCapacity_int32_T
+emxFree_int32_T
+emxInit_int32_T
+emxEnsureCapacity_creal_T
+emxFree_creal_T
+emxInit_creal_T
+emxEnsureCapacity_cell_wrap_0
+emxFreeStruct_struct0_T
+emxFree_real_T
+emxFree_cell_wrap_0
+emxInitStruct_struct0_T
+emxInit_real_T
+emxInit_cell_wrap_0
+emxEnsureCapacity_real_T
