@@ -1,4 +1,4 @@
-function [imgsIn] = dataLoaderWizard
+function [disImgs] = dataLoaderWizard
 % dataloader wizard - import script generator
 % WC Contiguity workflow
 % Assumes two h5oina files with specified data as TrueEbsd input
@@ -14,8 +14,9 @@ if selection=="No", setSave=0; else, setSave=1; end
 %% Find input files
 % keep loading more data until you're finished
 keepLoading = 1;
-imgsIn = {};
-dxy = [];
+imgsIn = cell(100,1);
+dxy = zeros(100,1);
+imgNN = 0;
 dataPath = cd; %this gets updated in while loop
 
 while keepLoading
@@ -24,11 +25,13 @@ while keepLoading
         "Options",["EBSD map","Image(s)","Done"], "DefaultOption","Done"); close(f1);
     switch selection
         case "EBSD map"
+            imgNN = imgNN+1;
             [f1,dataPath] = uigetfile([getMTEXpref('EBSDExtensions').';{'*.*'}],'Select EBSD map file',...
                 fullfile(dataPath),...
                 'MultiSelect','off');
+            if f1==0, continue; end %user selected "cancel"
             try
-                imgsIn{end+1} = importEbsdMap(f1,dataPath);
+                imgsIn{imgNN} = importEbsdMap(f1,dataPath);
             catch ME
                 warning("Couldn't load this EBSD map! Try again...")
             end
@@ -36,195 +39,47 @@ while keepLoading
             %try loading images as well if they are bundled into EBSD h5oina file
             if endsWith(f1,".h5oina")
                 [imgs1, dxy1] = importImages(f1, dataPath,imgsIn{end});
-                % there may be more than one image loaded, append them
-                % sequentially to the imgsIn list
-                assert(class(imgs1)=="cell");
-                for n=1:numel(imgs1)
-                    imgsIn{end+1} = imgs1{n};
-                    dxy(end+1) = dxy1(n);
+                if ~isempty_cell(imgs1)
+                    % there may be more than one image loaded, append them to the imgsIn list
+                    assert(class(imgs1)=="cell");
+                    imgsIn(imgNN+1:imgNN+numel(imgs1)) = imgs1;
+                    dxy(imgNN+1:imgNN+numel(imgs1)) = dxy1;
+                    imgNN = imgNN+numel(imgs1);
                 end
             end
         case "Image(s)"
+            imgNN = imgNN+1;
             [f1,dataPath] = uigetfile('*.*','Select image file',...
                 fullfile(dataPath),'MultiSelect','off');
-            % TODO -- UI ask for image pixel size
-            [imgsIn{end+1},dxy(end+1)] = importImages(f1, dataPath);
+            if f1==0, continue; end %user selected "cancel"
+            [imgs1, dxy1] = importImages(f1, dataPath);
+            if ~isempty_cell(imgs1)
+                assert(class(imgs1)=="cell");
+                imgsIn(imgNN:imgNN+numel(imgs1)-1) = imgs1;
+                dxy(imgNN:imgNN+numel(imgs1)-1) = dxy1;
+                imgNN = imgNN+numel(imgs1)-1;
+            end
+
         case "Done"
             keepLoading = 0;
+            % Truncate extra space
+            % some of these may be in the middle where an empty image is
+            % selected
+            rowsToKeep = ~cellfun('isempty',imgsIn);
+            imgsIn = imgsIn(rowsToKeep);
+            dxy = dxy(rowsToKeep);
+            imgNN = nnz(rowsToKeep);
     end
 end
-
-% 1. Do you have an EBSD map?
-
-% 2. Handle case where you don't have an EBSD map
-
-% 3. Do you have images?
-% If they are bundled in a container e.g. an h5oina file, create UI options
-
-% Reorder list
-
-return;
-
 
 
 
 %% construct distortedImg list
 %TODO - UI reorder and construct disImgs array
-disImgs = reorderImages(imgsIn{:});
-
-%TODO - make this into a private function
-    function disImgs = reorderImages(varargin)
-        if nargin<1
-            return
-        end
-        nImgs = nargin;
-        %%
-        % create UI
-        fig = uifigure('WindowState', 'maximized');
-        gl = uigridlayout(fig,[nImgs+2 5]); %4 columns, n+2 rows depending on number of inputs
-
-        [gl.ColumnWidth{:}] = deal('1x');
-
-        gl.ColumnWidth{1} = 'fit';
-
-        % % % create column headers
-        gl.RowHeight{1} = 'fit';
-        lbl = uilabel(gl,"Text","Image","HorizontalAlignment","center");
-        lbl.Layout.Column = 1; lbl.Layout.Row = 1;
-        lbl = uilabel(gl,"Text","List order:","HorizontalAlignment","center");
-        lbl.Layout.Column = 2; lbl.Layout.Row = 1;
-        lbl = uilabel(gl,"Text","Good image contrast?","HorizontalAlignment","center", ...
-            'WordWrap','on');
-        lbl.Layout.Column = 3; lbl.Layout.Row = 1;
-        lbl = uilabel(gl,"Text","Edge width (pixels):","HorizontalAlignment","center" ...
-            ,'WordWrap','on');
-        lbl.Layout.Column = 4; lbl.Layout.Row = 1;
-        lbl = uilabel(gl,"Text","Smoothing filter kernel size (pixels):","HorizontalAlignment","center" ...
-            ,'WordWrap','on');
-        lbl.Layout.Column = 5; lbl.Layout.Row = 1;
-
-        % % % create 'Done' and 'Cancel' button
-        gl.RowHeight{nImgs+2} = 'fit';
-        btn1 = uibutton(gl, 'push','Text','Done',"HorizontalAlignment","center", ...
-            "ButtonPushedFcn", @getCurrentValues);
-        btn1.Layout.Row = nImgs+2; btn1.Layout.Column = [1 2];
-        btn2 = uibutton(gl, 'push','Text','Cancel',"HorizontalAlignment","center", ...
-            "ButtonPushedFcn", @resetInputs);
-        btn2.Layout.Row = nImgs+2; btn2.Layout.Column = [3 4];
-
-        function getCurrentValueBus(src,event)
-           % get values and return TODO
-        end
-        function resetInputs(src,event)
-            % reset and replot TODO
-        end
-
-        % % % create image thumbnail in each row, column 1
-        for ii = 1:nImgs
-            % avoid while debugging
-            imgDisp = ebsd.bc;
-            % if isa(varargin{ii},'EBSD')
-            %     if isfield(varargin{ii}.prop,'bc')
-            %           imgDisp = varargin{ii}.bc;
-            %       elseif isfield(varargin{ii}.prop,'iq')
-            %           imgDisp = varargin{ii}.iq;
-            %       else
-            %           warning("Couldn't find EBSD pattern quality field, using Euler Angle 1 map as image. " + ...
-            %               "This is probably suboptimal; please modify the script yourself.")
-            %           imgDisp = varargin{ii}.rotations.phi1;
-            %     end
-            % else
-            %     imgDisp = varargin{ii};
-            % end
-            if ndims(imgDisp)<3
-                imgDisp = repmat(rescale(imgDisp),[1 1 3]);
-            end
-            iThumb = uiimage(gl, "ImageSource",imgDisp);
-            iThumb.Layout.Row = ii+1; iThumb.Layout.Column = 1;
-        end
-
-        % % % create list order selector in each row, column 2
-        listTxt = "Image " + num2str((1:nImgs).');
-        listTxt(1) = listTxt(1) + " (max distorted)";
-        listTxt(end) = listTxt(end) + " (ref image)";
-
-        listOrder = createArray(1,nImgs,"matlab.ui.control.ListBox");
-        for ii = 1:nImgs
-            listOrder(ii) = uilistbox(gl,'Items',listTxt);
-            listOrder(ii).Value = listTxt(ii);
-            listOrder(ii).Layout.Row = ii+1;
-            listOrder(ii).Layout.Column = 2;
-        end
-        % TODO - make sure listOrderDD.values are unique before proceeding
-
-
-        % % % create high contrast checkboxes in each row, column 3
-        tfContrast = createArray(1,nImgs,"matlab.ui.control.CheckBox");
-        for ii = 1:nImgs
-            tfContrast(ii) = uicheckbox(gl,'Value',true,'Text',"");
-            tfContrast(ii).Layout.Row = ii+1;
-            tfContrast(ii).Layout.Column = 3;
-        end
-
-        % % % create edge pad width selector in each row, column 4
-        padWid = createArray(1,nImgs,"matlab.ui.control.Spinner");
-        for ii = 1:nImgs
-            padWid(ii) = uispinner(gl,'Value',3,'Limits',[1 Inf],...
-                'ValueDisplayFormat','%d pixels',"HorizontalAlignment","center");
-            padWid(ii).Layout.Row = ii+1;
-            padWid(ii).Layout.Column = 4;
-        end       
-        
-        % % % create edge pad width selector in each row, column 5
-        filtWid = createArray(1,nImgs,"matlab.ui.control.Spinner");
-        for ii = 1:nImgs
-            filtWid(ii) = uispinner(gl,'Value',2,'Limits',[0 Inf],...
-                'ValueDisplayFormat','%d pixels',"HorizontalAlignment","center");
-            filtWid(ii).Layout.Row = ii+1;
-            filtWid(ii).Layout.Column = 5;
-        end
-
-
-
-        %%
-
-        % create distortedImg array
-        % TODO - not yet -- re-plot in correct order and define distortion models
-        % first
-        disImgs=createArray(nImgs,1,'distortedImg');
-        for ii=1:nImgs
-            disImg1 = varargin{permorder(ii)};
-            if isa(disImg1,"EBSD") %EBSD map
-                if isfield(disImg1.prop,'bc')
-                    pq = 'bc';
-                elseif isfield(disImg1.prop,'iq')
-                    pq = 'iq';
-                else
-                    warning("Couldn't find EBSD pattern quality field, using Euler Angle 1 map as image. " + ...
-                        "This is probably suboptimal; please modify the script yourself.")
-                    pq = 'rotations.phi1';
-                end
-                disImgs(ii) = distortedImg(pq, distortionName(permorder(ii)), disImg1, ...
-                    'highContrast',tfContrast(permorder(ii)),'edgePadWidth',padWid(permorder(ii)));
-            else %assume image
-                disImgs(ii) = distortedImg(imgName,distortionName(permorder(ii)),disImg1, ...
-                    'dxy', dxy(permorder(ii)), ...
-                    'highContrast',tfContrast(permorder(ii)),'edgePadWidth',padWid(permorder(ii)));
-            end
-        end
-
-    end
-
-%%image preprocessing
-% TODO - put in reorder UI
-% str_filterSize = inputdlg('Image denoising (imboxfilt) kernel radius ', 'Enter number of pixels', 1, {'3'});
-% filterSize=str2double(str_filterSize{:});
+fig = uifigure('WindowState', 'maximized');
+disImgs =  reorderImagesUI(fig,dxy,imgsIn{:});
+% uiwait(fig);
 %
-% % image denoising
-% fsdB3 = rescale(imboxfilt(fsdB3,filterSize));
-% fsdT3 = rescale(imboxfilt(fsdT3,filterSize));
-% fsdT1 = rescale(imboxfilt(fsdT1,filterSize));
-% fsdT10= rescale(imboxfilt(fsdT10,filterSize));
 
 % disImgs=createArray(5,1,'distortedImg');
 % disImgs(1) = distortedImg('bc','shift-drift', ebsd, 'how2plot', pC, 'highContrast',1,'edgePadWidth',3);
@@ -273,7 +128,6 @@ try
     writelines(newTxt,fullfile(fp,['loadData_' dataName '.m']));
 
 catch ME
-    ME1 = ME;
     if n<numel(templateTxt)
         error(['error writing line ' num2str(n) ...
             ' of dataloader script, check your template.']);
@@ -315,10 +169,11 @@ end
     end
 %% Import SEM images
     function [imgs1,dxy] = importImages(f1, dataPath, varargin)
-        imgs1 = {};
-        dxy = [];
+        imgs1 = cell(100,1);
+        dxy = zeros(100,1);
+        imgN = 0;
         if endsWith(f1,".h5oina")
-            if exist("varargin","var") && isa(varargin{1},"EBSD")
+            if ~isempty(varargin) && isa(varargin{1},"EBSD")
                 h5Imgs = varargin{1};
             else
                 h5Imgs = EBSD.load(fullfile(dataPath,f1));
@@ -374,15 +229,17 @@ end
 
             keepLoading1 = true;
             while keepLoading1
-                [imgs1{end+1},keepLoading1] = selectImage;
-                dxy(end+1) = double(h5Imgs.opt.Images.Header.X_Step);
+                imgN = imgN+1;
+                [imgs1{imgN},keepLoading1] = selectImage;
+                dxy(imgN) = double(h5Imgs.opt.Images.Header.X_Step);
 
             end
 
         elseif any(endsWith(f1,[imformats().ext]))
             % load normal image files
-            imgs1{1} = rescale(im2double(imread(fullfile(dataPath,f1))));
-            dxy(end+1) = str2double(inputdlg('Image pixel length ', 'Enter image pixel size in um: ', 1, "0"));
+            imgN = imgN+1;
+            imgs1{imgN} = rescale(im2double(imread(fullfile(dataPath,f1))));
+            dxy(imgN) = str2double(inputdlg('Image pixel length ', 'Enter image pixel size in um: ', 1, "0"));
         else
             warning('Unrecognised image file format. No image loaded.')
         end
@@ -420,6 +277,9 @@ end
             end
         end
 
+        % remove unallocated space
+        imgs1 = imgs1(1:imgN);
+        dxy = dxy(1:imgN);
     end
 
 
