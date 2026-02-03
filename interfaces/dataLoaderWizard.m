@@ -1,15 +1,10 @@
-function [disImgs] = dataLoaderWizard
+function [job] = dataLoaderWizard
 % dataloader wizard - import script generator
-% WC Contiguity workflow
-% Assumes two h5oina files with specified data as TrueEbsd input
-
-
-%% Do you want to save outputs?
-f1 = uifigure;
-selection = uiconfirm(f1,"Do you want to save outputs?","Save options", ...
-    "Options",["Yes","No"], "DefaultOption",1); close(f1);
-if selection=="No", setSave=0; else, setSave=1; end
-% str_setSave = num2str(setSave);
+% UI will ask for:
+ % - input data (images and EBSD maps)
+ % - save option & folder
+ % - input parameters
+% outputs: @trueEbsd job with job.imgList
 
 %% Find input files
 % keep loading more data until you're finished
@@ -22,7 +17,7 @@ dataPath = cd; %this gets updated in while loop
 while keepLoading
     f1 = uifigure;
     selection = uiconfirm(f1,"What file do you want to load?","Load TrueEBSD data", ...
-        "Options",["EBSD map","Image(s)","Done"], "DefaultOption","Done"); close(f1);
+        "Options",["EBSD map","Image(s)","Done"], "DefaultOption","Done","CloseFcn",@(~, ~) close(f1));
     switch selection
         case "EBSD map"
             imgNN = imgNN+1;
@@ -74,69 +69,41 @@ end
 
 
 
-%% construct distortedImg list
-%TODO - UI reorder and construct disImgs array
-fig = uifigure('WindowState', 'maximized');
-disImgs =  reorderImagesUI(fig,dxy,imgsIn{:});
-% uiwait(fig);
-%
 
-% disImgs=createArray(5,1,'distortedImg');
-% disImgs(1) = distortedImg('bc','shift-drift', ebsd, 'how2plot', pC, 'highContrast',1,'edgePadWidth',3);
-% disImgs(2) = distortedImg(fsdB3,'true', 'dxy', pixSzImg, 'highContrast',1,'edgePadWidth',5);
-% disImgs(3) = distortedImg(fsdT3,'shift', 'dxy', pixSzImg, 'highContrast',1,'edgePadWidth',5);
-% disImgs(4) = distortedImg(fsdT1,'tilt', 'dxy', pixSzImg, 'highContrast',1,'edgePadWidth',5);
-% disImgs(5) = distortedImg(fsdT10,'true', 'dxy', pixSzImg, 'highContrast',1,'edgePadWidth',3);
+%% construct distortedImg list
+% UI reorder and construct disImgs array
+fig = uifigure('WindowState', 'maximized');
+reorderImagesUI(fig,dxy,imgsIn{:});
+uiwait(fig);
+
+% % outputs are stored in fig.UserData.disImgs
+job = trueEbsd(fig.UserData.disImgs);
+close(fig);
+
+%% Do you want to save trueEbsd job?
+f1 = uifigure;
+selection = uiconfirm(f1,"Save trueEbsd job to file?","Save options", ...
+    "Options",["Yes","No"], "DefaultOption",1,"CloseFcn",@(~, ~) close(f1));
+if selection=="Yes"
+    [file, savepname] = uiputfile('*.mat',"Save trueEbsd job as MAT file:","untitled.mat");
+    if ischar(file) || isstring(file)
+        save(fullfile(savepname,file),"job");
+    end
+end
 
 %% Check your images
 % you can zoom in and out - tile axes are linked
 figure("WindowState","maximized");
 tiledlayout('flow','TileSpacing','compact','Padding','tight');
-for n=1:numel(disImgs)
+for n=1:numel(job.imgList)
     nexttile;
-    imagesc('XData',disImgs(n).dx.*(1:size(disImgs(n).img,2)),...
-        'YData',disImgs(n).dy*(1:size(disImgs(n).img,1)),...
-        'CData',disImgs(n).img);
+    imagesc('XData',job.imgList(n).dx.*(1:size(job.imgList(n).img,2)),...
+        'YData',job.imgList(n).dy*(1:size(job.imgList(n).img,1)),...
+        'CData',job.imgList(n).img);
     colormap gray; axis image on ij;
     title(['Distorted Image ' num2str(n)])
 end
 linkaxes;
-
-
-%% Save script
-%Load template
-[fp,fn,fe]=fileparts(which('dataLoaderWizard_Template.txt'));
-templateTxt = readlines(fullfile(fp,strcat(fn,fe)));
-newTxt = templateTxt;
-% find text between angle brackets < > you want to replace
-try
-    for n=1:numel(templateTxt)
-        idxStart = strfind(templateTxt(n),"<");
-        idxEnd = strfind(templateTxt(n),">");
-        if ~isempty(idxStart)
-            for c=1:numel(idxStart) % incase of more than one replacement per line
-                replaceMe(c) = extractBetween(templateTxt(n),idxStart(c),idxEnd(c),'Boundaries','exclusive');
-            end
-            newTxt(n) = replaceBetween(templateTxt(n),idxStart(c),idxEnd(c),eval(replaceMe(c)),'Boundaries','inclusive');
-        else
-            continue;
-        end
-    end
-    % guess dataset name by parent folder name
-    st = split(dataPath,filesep);
-    dataName = removeweirdchars(char(st(find(cellfun(@numel,st),1,"last"))));
-    writelines(newTxt,fullfile(fp,['loadData_' dataName '.m']));
-
-catch ME
-    if n<numel(templateTxt)
-        error(['error writing line ' num2str(n) ...
-            ' of dataloader script, check your template.']);
-    else
-        error('error writing dataloader script, check your folder permissions.');
-    end
-
-end
-
 
 %% %%% Subfunctions
 %% Import EBSD maps
@@ -166,6 +133,7 @@ end
         assert(isa(ebsd,'EBSDsquare'),"EBSD map must be in square grid format!");
         ebsd.how2plot = pC;
         disp("Crystal orientation reference axes rotated to match image (Y↓→X).");
+        display(ebsd);
     end
 %% Import SEM images
     function [imgs1,dxy] = importImages(f1, dataPath, varargin)
@@ -177,10 +145,7 @@ end
                 h5Imgs = varargin{1};
             else
                 h5Imgs = EBSD.load(fullfile(dataPath,f1));
-            end
-            % if varargin
-            % TODO - ebsd object as optional input so no need to load twice
-            % end
+            end          
             % load images inside h5oina container
             disp(append("Loooking for images in file", f1, ": "));
 
@@ -239,7 +204,16 @@ end
             % load normal image files
             imgN = imgN+1;
             imgs1{imgN} = rescale(im2double(imread(fullfile(dataPath,f1))));
-            dxy(imgN) = str2double(inputdlg('Image pixel length ', 'Enter image pixel size in um: ', 1, "0"));
+            try %#ok<TRYNC> % to display any TIFF metadata
+                info = imfinfo(fullfile(dataPath,f1));
+                tag=[info.UnknownTags.Value];
+                infoPix = extract(tag,caseInsensitivePattern(wildcardPattern(20)+"pixel"+wildcardPattern(50)));
+                f1 = uifigure; 
+                uialert(f1,[infoPix{:}],"TIFF tag info possibly related to image pixel size:",...
+                    "CloseFcn",@(~, ~) close(f1));
+                uiwait(f1);
+            end
+            dxy(imgN) = str2double(inputdlg('Enter image pixel length in um: ','Image pixel length', 1, "1"));
         else
             warning('Unrecognised image file format. No image loaded.')
         end

@@ -1,11 +1,12 @@
-function [disImgs] = reorderImagesUI(fig,dxyList,varargin)
+function reorderImagesUI(fig,dxyList,varargin)
 % construct GUI for input data order and settings
 % input = imported images and/or EBSD maps
-% output = @distortedImg array
+% output = @distortedImg array inside fig.UserData.disImgs
 
-if nargin<1
+if nargin<3
     return
 end
+
 imgListIn = varargin;
 nImgs = numel(imgListIn);
 % initialise output
@@ -75,10 +76,11 @@ end
 listTxt = "Image " + num2str((1:nImgs).');
 listTxt(1) = listTxt(1) + " (max distorted)";
 listTxt(end) = listTxt(end) + " (ref image)";
+listTxt(end+1) = "Remove";
 
 listOrder = createArray(1,nImgs,"matlab.ui.control.ListBox");
 for jj = 1:nImgs
-    listOrder(jj) = uilistbox(gl,"Items",listTxt,"ItemsData",(1:nImgs));
+    listOrder(jj) = uilistbox(gl,"Items",listTxt,"ItemsData",[(1:nImgs) nan]);
     listOrder(jj).Value = jj; %which one is selected by default
     listOrder(jj).Layout.Column = jj+1;
     listOrder(jj).Layout.Row = 2;
@@ -137,7 +139,6 @@ end
 %% % create dropdown for distortion name selection  in each Column, Row 6 
 % distortion is w.r.t. next image
 % do not allow selection before next order
-% may need a 'valuechangedfcn' from the listOrder box
 
 if any(1:nImgs ~= sort([listOrder(:).Value]))
     ddTxt = "Reorder images first!";
@@ -166,18 +167,19 @@ end
 
     function reorderInputs(src,event)
         % button callback for 'Reorder'
-        
         % make sure listOrder.ItemsData values are unique before proceeding
         if numel(unique([listOrder(:).Value]))~=nImgs
             f1 = uifigure;
-            uiconfirm(f1,"Invalid image order! Try again.","Selection Error!", ...
-                "Options","OK"); close(f1);
+            uialert(f1,"Invalid image order! Try again.","Selection Error!", ...
+                "CloseFcn",@(~, ~) close(f1));
             return;
         end
-
+        [sorted,newOrder] = sort([listOrder(:).Value]); 
+        newOrder = newOrder(~isnan(sorted)); %remove selected items
+        disp(newOrder);
         % then re-plot GUI in new order
-        imgListOut = imgListIn([listOrder(:).Value]); 
-        dxyListOut = dxyList([listOrder(:).Value]);
+        imgListOut = imgListIn(newOrder); 
+        dxyListOut = dxyList(newOrder);
         reorderImagesUI(fig,dxyListOut,imgListOut{:});        
     end
 %%
@@ -185,7 +187,7 @@ end
         % button callback for 'Reset'
         % don't get current values
         % just replot GUI
-        reorderImagesUI(fig,imgListIn{:});
+        reorderImagesUI(fig,dxyList,imgListIn{:});
 
     end
 %%
@@ -199,20 +201,20 @@ end
 
         if any(matches({distortionName(:).Value},"Select distortion type:")) ||...
                 any(matches({distortionName(:).Value},"Reorder images first!"))
-            f1 = uifigure; uiconfirm(f1,"Select distortion model names first! Try again.","Selection Error", ...
-                "Options","OK"); close(f1);
+            f1 = uifigure; uialert(f1,"Select distortion model names first! Try again.", ...
+                "Selection Error", "CloseFcn",@(~, ~) close(f1));
             return;
         end
         if distortionName(nImgs).Value ~= "true"
-            f1 = uifigure; uiconfirm(f1,"Final image must be reference image. " + ...
-                "Please select 'true' for distortion name.","Selection Error", ...
-                "Options","OK"); close(f1);
+            f1 = uifigure; uialert(f1,"Final image must be reference image. " + ...
+                "Please select 'true' for distortion name.", ...
+                "Selection Error", "CloseFcn",@(~, ~) close(f1));
             return;
         end
         
         if any(1:nImgs ~= sort([listOrder(:).Value]))
-            f1 = uifigure; uiconfirm(f1,"Invalid image order! Try again.","Selection Error", ...
-                "Options","OK"); close(f1);
+            f1 = uifigure; uialert(f1,"Invalid image order! Try again.", ...
+                "Selection Error", "CloseFcn",@(~, ~) close(f1));
             return;
         end
 
@@ -249,6 +251,7 @@ end
             end
             
         end
+        fig.UserData.disImgs = disImgs;
         uiresume(fig);
     end
 
