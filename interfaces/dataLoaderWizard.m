@@ -1,4 +1,4 @@
-function [job] = dataLoaderWizard
+function [job,matFileOut] = dataLoaderWizard
 % dataloader wizard - import script generator
 % UI will ask for:
  % - input data (images and EBSD maps)
@@ -87,23 +87,12 @@ selection = uiconfirm(f1,"Save trueEbsd job to file?","Save options", ...
 if selection=="Yes"
     [file, savepname] = uiputfile('*.mat',"Save trueEbsd job as MAT file:","untitled.mat");
     if ischar(file) || isstring(file)
-        save(fullfile(savepname,file),"job");
+        matFileOut = fullfile(savepname,file);
+        save(matFileOut,"job","-v7.3");
     end
+else
+    matFileOut="";
 end
-
-%% Check your images
-% you can zoom in and out - tile axes are linked
-figure("WindowState","maximized");
-tiledlayout('flow','TileSpacing','compact','Padding','tight');
-for n=1:numel(job.imgList)
-    nexttile;
-    imagesc('XData',job.imgList(n).dx.*(1:size(job.imgList(n).img,2)),...
-        'YData',job.imgList(n).dy*(1:size(job.imgList(n).img,1)),...
-        'CData',job.imgList(n).img);
-    colormap gray; axis image on ij;
-    title(['Distorted Image ' num2str(n)])
-end
-linkaxes;
 
 %% %%% Subfunctions
 %% Import EBSD maps

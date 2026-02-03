@@ -176,7 +176,6 @@ end
         end
         [sorted,newOrder] = sort([listOrder(:).Value]); 
         newOrder = newOrder(~isnan(sorted)); %remove selected items
-        disp(newOrder);
         % then re-plot GUI in new order
         imgListOut = imgListIn(newOrder); 
         dxyListOut = dxyList(newOrder);
@@ -236,7 +235,7 @@ end
                     pq = 'rotations.phi1';
                 end
                 disImgs(ii) = distortedImg(pq, distortionName(ix).Value, disImg1, ...
-                    'highContrast',tfContrast(ix),'edgePadWidth',round(padWid(ix).Value));
+                    'highContrast',tfContrast(ix).Value,'edgePadWidth',round(padWid(ix).Value));
 
             else %assume image
                 %filter image first
@@ -246,7 +245,7 @@ end
                     disImg2=disImg1;
                 end
                 disImgs(ii) = distortedImg(disImg2,distortionName(ix).Value,...
-                    'dxy', dxyList(ix), 'highContrast',tfContrast(ix),...
+                    'dxy', dxyList(ix), 'highContrast',tfContrast(ix).Value,...
                     'edgePadWidth',round(padWid(ix).Value));
             end
             
