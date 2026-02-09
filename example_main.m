@@ -52,6 +52,7 @@ addpath(genpath(trueEbsdPath));
 tic
 if matFileOut == ""
     setSave = 0;
+    dataName = "this dataset";
     disp(append('Outputs will not be saved. ', newline));
 else
     setSave = 1;
@@ -92,7 +93,7 @@ disp(append('Finished set up trueEBSD job for ', dataName ,' in ', num2str(t1,'%
 % Outputs - distorted image sequence on a common pixel grid
 % |job.resizedList{:}|.
 
-pixSzIn = 0; % target pixel length in microns, or 0 to default to smallest common pixel size
+pixSzIn = uiSelectPixSize(job);
 job = pixelSizeMatch(job,pixSzIn);
 
 %%%
