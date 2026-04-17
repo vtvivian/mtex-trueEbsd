@@ -24,7 +24,7 @@
 % 20241001 - create TrueEBSD example script using copper29 data
 % 20241008 - tidy up published outputs and add voids analyses
 % 20260103 - update @trueEbsd class structures, add @pairShifts
-
+% 20260317 - 
 clear; close all; home;
 
 %% Add trueEBSD and MTEX MATLAB paths 
@@ -45,7 +45,7 @@ dataPath = '/media/Files/RockShare/Work/Projects/2025_trueEbsdMtex_paper/demodat
 cd(dataPath); %return to starting folder
 
 % Construct distortedImg list and set up trueEBSD job
-dataName = 'trueEbsdCopper_mtexVtfork';
+dataName = 'trueEbsdCopper';
 % file saving housekeeping
 setSave = 1;
 timestamp = char(datetime('now'),'yyMMdd_HHmm');
@@ -344,12 +344,17 @@ display(grainsVoids('voids'));
 
 %% Plot void size histogram
 % most voids are quite small, about 10 pixels big.
-figure; histogram(grainsVoids('voids'),grainsVoids('voids').area);
+figure;
+histogram(grainsVoids('voids'),grainsVoids('voids').area,50);
 xlabel('void area ({\mu}m^2)');
-figure; 
+if setSave, saveFigs(gcf,[dataName '_figs.pdf'],savepname); close; end
+figure;  
 histogram(grainsVoids('voids'),grainsVoids('voids').numPixel,50);
 xlabel('void area (pixels)'); 
-set(gca,'InnerPosition',[66.6000   65.0000  484.4000  335.5000]);
+if setSave, saveFigs(gcf,[dataName '_figs.pdf'],savepname); close; end
+figure;  
+histogram(grainsVoids('voids'),grainsVoids('voids').diameter/ebsd.dPos,50);
+xlabel('void diameter (pixels)'); 
 if setSave, saveFigs(gcf,[dataName '_figs.pdf'],savepname); close; end
 
 %% Calculate copper grains and boundaries
@@ -593,10 +598,10 @@ figure; newMtexFigure;
 plot(ebsd('Copper'),ebsd('Copper').orientations,'FaceAlpha',0.3,ebsd.how2plot); hold on;
 plot(gBs,ebsd.how2plot,'linecolor',str2rgb('gray'));
 plot(ebsd('voids'),zeros(size(ebsd('voids'))),ebsd.how2plot); colormap gray; clim([0 1]);
-plot(gBs(voidsListGb_on),ebsd.how2plot,'linecolor','g','linewidth',2);
-plot(gBs(voidsListGb_near),ebsd.how2plot,'linecolor',str2rgb('DarkGreen'),'linewidth',2);
-plot(tPGbs(voidsListTp_on),ebsd.how2plot,'linecolor','m','linewidth',3);
+plot(gBs(voidsListGb_near),ebsd.how2plot,'linecolor',str2rgb('DarkGreen'),'linewidth',3);
+plot(gBs(voidsListGb_on),ebsd.how2plot,'linecolor',str2rgb('LightGreen'),'linewidth',3);
 plot(tPGbs(voidsListTp_near),ebsd.how2plot,'linecolor',str2rgb('DarkRed'),'linewidth',3);
+plot(tPGbs(voidsListTp_on),ebsd.how2plot,'linecolor','m','linewidth',3);
 if setSave, saveFigs(gcf,[dataName '_figs.pdf'],savepname); close; end
 
 %% Plot misorientation distributions 
