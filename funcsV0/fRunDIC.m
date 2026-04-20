@@ -41,6 +41,32 @@ end
 
 % roiPosX and roiPosY are the ROI centre locations
 switch fitfunc
+    case 'rigid'
+    % rigid body image displacement 
+    % weighted mean of XY displacmements using XCF peak height (quality) as
+    % weights
+
+    xShiftsXcf=xShiftsXcf(~isnan(CCmax_1));
+    yShiftsXcf=yShiftsXcf(~isnan(CCmax_1));
+    roiPosX=roiPosX(~isnan(CCmax_1));
+    % roiPosY=roiPosY(~isnan(CCmax_1));
+    CCmax=CCmax_1(~isnan(CCmax_1));
+
+    % calculate best fit
+    CCmax(CCmax<0) = 0; % make sure weights are real & nonnegative
+    xDisp=mean(xShiftsXcf(:),Weights=real(CCmax));
+    yDisp=mean(yShiftsXcf(:),Weights=real(CCmax));
+    
+    %for quiver plot
+    roiArray = zeros(size(roiPosX));
+    xshiftsROI= roiArray + xDisp;
+    yshiftsROI= roiArray + yDisp;
+    
+    % for entire image
+    imgArray = zeros(size(Image_ref));
+    xshifts = imgArray + xDisp; %pixel shifts in reference frame
+    yshifts = imgArray + yDisp;
+
     case 'poly11'
     %remove values with NaN XCF height
     xShiftsXcf=xShiftsXcf(~isnan(CCmax_1));
