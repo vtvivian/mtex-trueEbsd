@@ -18,55 +18,44 @@
 % <dataName>_figs.pdf file of figures
 % <dataName>_out.mat data file.
 
+
 clear; close all; home;
 
-%% Add trueEBSD and MTEX MATLAB paths 
-% startup MTEX (replace this with local path)
+%% Add trueEBSD and MTEX MATLAB paths
+% startup MTEX (replace this with local path to skip UI)
 mtexPath = "/home/rock/Documents/Git-projects/mtex";
+if ~isfile(fullfile(mtexPath,"startup_mtex.m"))
+    mtexPath = uigetdir(cd,"Select MTEX folder:");
+elseif mtexPath == ""
+    mtexPath = cd;
+end
 cd(mtexPath);
-startup_mtex; %variables get cleared after this step so you need to recreate mpath
-mtexPath = "/home/rock/Documents/Git-projects/mtex";
+startup_mtex;
+%variables get cleared after this step so recreate path
+mtexPath = cd;
 
-
-% startup trueEbsd (replace this with local path)
+% startup trueEbsd (replace this with local path to skip UI)
 trueEbsdPath = "/home/rock/Documents/Git-projects/mtex-trueEbsd";
+if ~isfolder(fullfile(trueEbsdPath,"@trueEbsd"))
+    trueEbsdPath = uigetdir(cd,"Select TrueEBSD folder:");
+elseif trueEbsdPath == ""
+    trueEbsdPath = cd;
+end
 addpath(genpath(trueEbsdPath));
+
 
 %% Import data + file saving
 tic
-%replace the next line with local data storage path
-dataPath = '/media/Files/RockShare/Work/Projects/2025_trueEbsdMtex_paper/demodata_WCCo';
-cd(dataPath); %return to starting folder
-
-% Construct distortedImg list and set up trueEBSD job
-dataName = 'trueEbsdWCCo_mtexVtfork';
-% file saving housekeeping
-setSave = 1;
-timestamp = char(datetime('now'),'yyMMdd_HHmm');
-savepname = fullfile(dataPath, [dataName '_' timestamp]);
-
-if setSave
-    if ~exist (savepname, 'dir')
-        mkdir(savepname);
-    end
-    diary(fullfile(savepname,[dataName '.log']));
-    diary on
-end
-
-% TrueEBSD and MTEX version IDs
-% version ID as git hash in mtex-trueEbsd repo
-% vId can be a number or char array
-try vId_trueEbsd = githash('.',trueEbsdPath); catch, vId_trueEbsd = '0'; end
-try vId_mtex = githash('.',mtexPath); catch, vId_mtex = '0'; end
-
-disp(['Starting trueEBSD job for ' dataName ': ']);
-disp(['TrueEBSD Git version ' vId_trueEbsd '. ']);
-disp(['MTEX Git version ' vId_mtex '. ']);
-
-if setSave
-    disp(['Outputs will be saved to ' savepname '/. ']);
+if matFileOut == ""
+    setSave = 0;
+    dataName = "this dataset";
+    disp(append('Outputs will not be saved. ', newline));
 else
-    disp(['Outputs will not be saved. ']);
+    setSave = 1;
+    [savepname,dataName,~] = fileparts(matFileOut);
+    diary(fullfile(savepname,append(dataName,'_trueEbsd.log')));
+    diary on
+    disp(append('Outputs will be saved to ', savepname, '/. ', newline));
 end
 
 %% Data Import
