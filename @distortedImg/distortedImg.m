@@ -206,6 +206,8 @@ classdef distortedImg
             % input = @distortedImg property distortionName - @char array
             % output =  @distortedImg property distortionModel - @char array
             switch disImg.distortionName
+                case 'rigid'
+                    out = {'rigid'};
                 case 'shift'
                     out = {'poly11'};
                 case 'shift-interp'
