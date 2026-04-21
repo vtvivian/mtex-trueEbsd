@@ -230,5 +230,41 @@ classdef distortedImg
                     error('uknown distortion model');
             end
         end
+
+        function [disImg, rectOut] = imcrop(disImg, varargin)
+            % interactive image crop
+            % inputs: disImg
+            % optional inputs: crop rectangle [xmin ymin width height]
+            % outputs: cropped disImg, crop rectangle
+            
+            % specified crop dims
+            if nargin > 1
+                rect= varargin{1};
+            else
+            % interactive option
+            % if license('test',"Image_Toolbox") %if image processing toolbox is available
+            %    figure;
+            %    [~,rect] = imcrop(disImg.img);
+            % else
+                figure; imagesc(disImg.img); axis image on; colormap gray;
+                title('Click opposite corners of crop target area:')
+                [x,y] = ginput(2); %
+                rect = [min(x), min(y),max(x)-min(x)+1,max(y)-min(y)+1];
+            % end
+            end
+            
+            % crop images -- everything is in pixel units so round this
+            % also this is a MATLAB image plot so x=cols y=rows
+            % remember to pass 3rd dimension for multi-channel images
+            rectOut = round(rect);
+            disImg.img = disImg.img(rectOut(2):rectOut(2)+rectOut(4)-1,...
+                rectOut(1):rectOut(1)+rectOut(3)-1,:);
+            disImg.pos = disImg.pos(rectOut(2):rectOut(2)+rectOut(4)-1,...
+                rectOut(1):rectOut(1)+rectOut(3)-1);
+            if ~isempty(disImg.ebsd)
+                disImg.ebsd = disImg.ebsd(rectOut(2):rectOut(2)+rectOut(4)-1,...
+                rectOut(1):rectOut(1)+rectOut(3)-1);
+            end
+        end
     end
 end
