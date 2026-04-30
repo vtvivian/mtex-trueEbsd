@@ -235,11 +235,17 @@ classdef distortedImg
             % interactive image crop
             % inputs: disImg
             % optional inputs: crop rectangle [xmin ymin width height]
+            % Options:
+            % 'unit','pixels' or 'unit','xy' 
+            %
             % outputs: cropped disImg, crop rectangle
+
+            [varargin{:}] = convertStringsToChars(varargin{:});
             
             % specified crop dims
             if nargin > 1
                 rect= varargin{1};
+                varargin(1)=[];
             else
             % interactive option
             % if license('test',"Image_Toolbox") %if image processing toolbox is available
@@ -252,19 +258,28 @@ classdef distortedImg
                 rect = [min(x), min(y),max(x)-min(x)+1,max(y)-min(y)+1];
             % end
             end
+
+            % look for crop units = 'pixels' or 'xy' 
+            unit = get_option(varargin,'unit','pixels',{'char'});            
             
             % crop images -- everything is in pixel units so round this
             % also this is a MATLAB image plot so x=cols y=rows
             % remember to pass 3rd dimension for multi-channel images
-            rectOut = round(rect);
-            disImg.img = disImg.img(rectOut(2):rectOut(2)+rectOut(4)-1,...
-                rectOut(1):rectOut(1)+rectOut(3)-1,:);
-            disImg.pos = disImg.pos(rectOut(2):rectOut(2)+rectOut(4)-1,...
-                rectOut(1):rectOut(1)+rectOut(3)-1);
-            if ~isempty(disImg.ebsd)
-                disImg.ebsd = disImg.ebsd(rectOut(2):rectOut(2)+rectOut(4)-1,...
-                rectOut(1):rectOut(1)+rectOut(3)-1);
+            switch unit
+                case 'pixels'
+                    rectOut = round(rect);
+                    disImg.img = disImg.img(rectOut(2):rectOut(2)+rectOut(4)-1,...
+                        rectOut(1):rectOut(1)+rectOut(3)-1,:);
+                    disImg.pos = disImg.pos(rectOut(2):rectOut(2)+rectOut(4)-1,...
+                        rectOut(1):rectOut(1)+rectOut(3)-1);
+                    if ~isempty(disImg.ebsd)
+                        disImg.ebsd = disImg.ebsd(rectOut(2):rectOut(2)+rectOut(4)-1,...
+                            rectOut(1):rectOut(1)+rectOut(3)-1);
+                    end
+                case 'xy'
+                    error('imcrop(@distortedImg) with xy positions not implemented yet, please use pixels')
             end
-        end
-    end
-end
+        end %end imcrop
+
+    end %end methods
+end %end class
