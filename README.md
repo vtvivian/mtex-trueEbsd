@@ -5,6 +5,9 @@ Download the latest release: https://github.com/vtvivian/mtex-trueEbsd/releases
 
 More information on the wiki page: https://github.com/vtvivian/mtex-trueEbsd/wiki
 
+[NEW! Paper preprint](http://arxiv.org/abs/2605.00703): TrueEBSD in MTEX: automatic image matching for correlative microscopy
+  applications; Vivian Tong, Stefan Olovsjö, Rachid M'Saoubi, Mathias Grabner,  Manuel Petersmann, Liam Wright
+
 # Getting started
 To start using TrueEBSD, you will need:
 
