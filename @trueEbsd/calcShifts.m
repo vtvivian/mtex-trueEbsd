@@ -5,7 +5,7 @@ function job = calcShifts(job, varargin)
 %
 % Syntax:
 % job = calcShifts(job);
-% job = calcShifts(job.'fitErr');
+% job = calcShifts(job,'fitErr');
 %
 % Description:
 %   1. Get job.resizedList(n).edge for image cross-correlation
@@ -34,9 +34,13 @@ function job = calcShifts(job, varargin)
 %  gives an idea of the image registration quality,  but comes at a
 %  computational cost of an extra image registration step that is not used
 %  in the final output.
-%  'retryMax', retryMax - max number of retry attempts by doubling the ROI
-%  size to make the residual shifts smaller (default 100, which in practice
-%  is infinite)
+%  'retryMax', retryMax - max number of correlation attempts per image
+%  pair, where each attempt after the first doubles the ROI size to make the
+%  residual shifts smaller (default 100, which in practice is infinite).
+%  This counts total attempts, not extra ones, so retryMax=1 means a single
+%  pass with no retry; values below 1 are clamped to 1. Retrying needs a
+%  residual measurement to test against, so without the 'fitErr' flag every
+%  image pair gets exactly one pass whatever this is set to.
 %
 %
 % Outputs
@@ -71,19 +75,23 @@ function job = calcShifts(job, varargin)
 %  - Uses Statistics and Machine Learning Toolbox - robustfit()
 %
 
-if ~isempty(varargin)
-    %check for fitErr flag
-    fitErr1 = check_option(varargin,'fitErr');
-    %this means you need to calculate residual shifts
+%check for fitErr flag
+fitErr1 = check_option(varargin,'fitErr');
+%this means you need to calculate residual shifts
 
-    % retry1 means you rerun the XCF with a 2x window size
-    % use a random big number (100) means you retry until it works or you
-    % run out of space
-    % true unless this flag is on, OR if you don't calculate residual shifts (fitErr1 is false)
-    retryMax = get_option(varargin,'retryMax',100,{'double';'single';'uint8';'uint16';'uint32'});
-    if ~fitErr1, retryMax=0; end % if you don't calculate residual shifts you can't use this
-
-end
+% retry1 means you rerun the XCF with a 2x window size
+% use a random big number (100) means you retry until it works or you
+% run out of space
+% true unless this flag is on, OR if you don't calculate residual shifts (fitErr1 is false)
+retryMax = get_option(varargin,'retryMax',100,{'double';'single';'uint8';'uint16';'uint32'});
+% retryMax counts attempts, not extra attempts: the while-loops below start
+% at retryInc=1 and run while retryInc<=retryMax, so retryMax must be at
+% least 1 or no shifts are calculated at all.
+retryMax = max(retryMax,1);
+% Without 'fitErr' there are no residual shifts to test against, so there is
+% no basis for a retry -- the loops below set retryInc=inf after a single
+% pass in that case (see 'end while retry'). Don't rely on retryMax to stop
+% them: retryInc is only advanced inside the fitErr branch.
 
 % preallocate output array
 job.shifts = cell(1,numel(job.resizedList)-1);
@@ -176,6 +184,10 @@ if numel(job.resizedList) > nStart
                 else
                     retryInc=inf; %don't retry
                 end %end update ROI size for retry
+            else
+                % no residual shifts were measured, so there is nothing to
+                % decide a retry on -- one pass only
+                retryInc=inf;
             end %end fitErr - print xcf residuals
 
         end % end while retry
@@ -242,7 +254,7 @@ if nStart>1
                 job.fitError(n) = fRunDIC(imRef,remapImage(test.pos,job.shifts{n}(end),imTest,'test2ref'),xcf1(end),'poly11',test.dx,test.dy);
                 
                 %if residual shift length is larger than 2 pixels and we said we want to retry
-                residShiftPix = mean(sqrt((job.fitError(n).xShiftsXcf(:)/test.dx).^2+(job.fitError(n).yShiftsXcf(:)/test_angle2Points.dy).^2));
+                residShiftPix = mean(sqrt((job.fitError(n).xShiftsXcf(:)/test.dx).^2+(job.fitError(n).yShiftsXcf(:)/test.dy).^2));
                 if ~isempty(test.distortionModel{1}) && residShiftPix > 2  && retryInc<=retryMax
                     retryInc=retryInc+1; % go back and try the first pass again with a double sized ROI
                     disp(['Residual shifts length was greater than 2 pixels between images ' num2str(n+1) ' and ' num2str(n) ' (' test.distortionName ')']);
@@ -261,6 +273,10 @@ if nStart>1
                 else
                     retryInc=inf; %don't retry
                 end %end update ROI size for retry
+            else
+                % no residual shifts were measured, so there is nothing to
+                % decide a retry on -- one pass only
+                retryInc=inf;
             end %end fitErr - print xcf residuals
 
         end % end while retry
