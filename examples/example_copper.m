@@ -113,18 +113,27 @@ if strcmpi(warnId,'mtex:missingData')
     ebsd.how2plot.outOfScreen = zvector;
 end
 
+% MTEX 7 stores the images that ship inside an h5oina container in
+% ebsd.opt.electron_image; up to MTEX 6 the same struct was ebsd.opt.Images.
+% The contents are identical, so accept either.
+if isfield(ebsd.opt,'electron_image')
+    semImgs = ebsd.opt.electron_image;
+else
+    semImgs = ebsd.opt.Images;
+end
+
 display(ebsd);
-display(ebsd.opt.Images);
+display(semImgs);
 
 %%%
 % Now we extract a reference image which has good contrast for finding the
 % grain boundary voids, and an intermediate image to help with matching to
 % the EBSD map features.
 
-fsd1B = rescale(im2double(cat(3,ebsd.opt.Images.Lower_Centre_19, ...
-    ebsd.opt.Images.Lower_Left_19, ...
-    ebsd.opt.Images.Lower_Right_19))); 
-bse1 = rescale(im2double(ebsd.opt.Images.ABSinner_0deg)); 
+fsd1B = rescale(im2double(cat(3,semImgs.Lower_Centre_19, ...
+    semImgs.Lower_Left_19, ...
+    semImgs.Lower_Right_19))); 
+bse1 = rescale(im2double(semImgs.ABSinner_0deg)); 
 
 
 
@@ -146,9 +155,9 @@ bse1b = medfilt2(bse1,[3 3],'symmetric');
 % Construct @distortedImg imgList
 imgList=createArray(4,1,'distortedImg');
 imgList(1) = distortedImg('bc','shift-drift', ebsd, 'how2plot', ebsd.how2plot, 'highContrast',1,'edgePadWidth',3);
-imgList(2) = distortedImg(fsd1a,'tilt', 'dxy', double(ebsd.opt.Images.Header.X_Step), 'highContrast',1,'edgePadWidth',3); % 
-imgList(3) = distortedImg(bse1a,'true', 'dxy', double(ebsd.opt.Images.Header.X_Step), 'highContrast',1,'edgePadWidth',3); % 
-imgList(4) = distortedImg(bse1b,'true', 'dxy', double(ebsd.opt.Images.Header.X_Step), 'highContrast',0,'edgePadWidth',1); % BSE but with pores only
+imgList(2) = distortedImg(fsd1a,'tilt', 'dxy', double(semImgs.Header.X_Step), 'highContrast',1,'edgePadWidth',3); % 
+imgList(3) = distortedImg(bse1a,'true', 'dxy', double(semImgs.Header.X_Step), 'highContrast',1,'edgePadWidth',3); % 
+imgList(4) = distortedImg(bse1b,'true', 'dxy', double(semImgs.Header.X_Step), 'highContrast',0,'edgePadWidth',1); % BSE but with pores only
 
 %%
 % job is a |@trueEbsd| object containing a sequence of |@distortedImg|

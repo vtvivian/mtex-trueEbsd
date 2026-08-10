@@ -255,7 +255,14 @@ for n = 1:numel(job.imgList)
         phase1 = ebsdMap0;
         phase1(ix) = job.imgList(n).ebsd(ebsdNewId(ix)).phase;
         % recreate EBSD object
-        ebsd1 = EBSD(vector3d(posEbsdX, posEbsdY,ebsdMap0), rot1, phase1, ...
+        % everything above is built map-shaped (r*c) because that is how the
+        % image grid is indexed, but the @EBSD constructor wants one point
+        % per row -- MTEX 7's gridify hangs on a map-shaped @EBSD instead of
+        % rejecting it, so flatten explicitly here. gridify below restores
+        % the r*c shape.
+        prop1 = structfun(@(v) v(:), prop1, 'UniformOutput', false);
+        ebsd1 = EBSD(vector3d(posEbsdX(:), posEbsdY(:), ebsdMap0(:)), ...
+            rot1(:), phase1(:), ...
             job.resizedList(n).ebsd.CSList, prop1);
         ebsd1.how2plot = job.imgList(n).how2plot;
 
