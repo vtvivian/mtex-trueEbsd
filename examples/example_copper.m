@@ -295,9 +295,14 @@ plot(job.undistortedList(1).ebsd('indexed'), job.undistortedList(1).ebsd('indexe
     job.undistortedList(1).ebsd.how2plot,'coordinates','on');
 title('Undistorted MTEX EBSD map (Copper IPF-out of screen)','Color','k');
 for n=1:numel(job.undistortedList)
+    % plotting onto an EBSD map needs one value per pixel, but images may
+    % carry several channels, so average multi-channel images down to one
+    imgOut = job.undistortedList(n).img;
+    if size(imgOut,3) > 1, imgOut = mean(imgOut,3); end
+
     nextAxis;
     plot(job.undistortedList(1).ebsd, ...
-        ij2EbsdSquare(job.undistortedList(1).ebsd,job.undistortedList(n).img), ...
+        ij2EbsdSquare(job.undistortedList(1).ebsd,imgOut), ...
         job.undistortedList(1).ebsd.how2plot,'coordinates','on');
     mtexColorMap gray;
     title(['Undistorted MTEX image ' num2str(n)],'Color','k');
