@@ -220,7 +220,16 @@ for n = 1:numel(job.imgList)
         % use function tools/ij2EbsdSquare to handle conversion between ij indexing
         % positions (MATLAB convention) and EBSD xyz positions (convention
         % depends on system)
-        [posEbsdX, posEbsdY] = nwse2EbsdPos(job.imgList(n).ebsd,job.resizedList(n).pos.x, job.resizedList(n).pos.y);
+        %
+        % pos.x is the column (screen east) coordinate of the common image
+        % grid and pos.y the row (screen south) coordinate, both in um. The
+        % plotting convention says which way those point in map xy, so the
+        % conversion is just their sum along the screen axes.
+        pC = job.imgList(n).ebsd.how2plot;
+        posEbsd  = job.resizedList(n).pos.x .* pC.east + ...
+                   job.resizedList(n).pos.y .* pC.south;
+        posEbsdX = posEbsd.x;
+        posEbsdY = posEbsd.y;
         posEbsdX=ij2EbsdSquare(job.imgList(n).ebsd, posEbsdX);
         posEbsdY=ij2EbsdSquare(job.imgList(n).ebsd, posEbsdY);
         
@@ -278,13 +287,13 @@ for n = 1:numel(job.imgList)
 
 
         % translate ebsd object to match map image offset
-        % use function tools/ebsdMapOffset to convert between map dirs (NWSE)
-        % and positions vectors (XYZ)
-        % can't use ebsd +- directly because that's for xyz not ij map
-        % directions
         % offsetPos(1) = row shift, i.e. south
-        % offsetPos(2) = column shift. i.e. east
-        job.resizedList(n).ebsd = ebsdMapOffset(job.resizedList(n).ebsd,offsetPos(2),offsetPos(1));
+        % offsetPos(2) = column shift, i.e. east
+        % @EBSD/plus takes a vector3d, so build the offset along the screen
+        % axes and add it
+        pC = job.resizedList(n).ebsd.how2plot;
+        job.resizedList(n).ebsd = job.resizedList(n).ebsd + ...
+            (offsetPos(2)*pC.east + offsetPos(1)*pC.south);
     end
 
     % update ROI size in setXCF (from step 3), except leave reference image as it has no

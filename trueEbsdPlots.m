@@ -117,9 +117,9 @@ if any(ebsdIdx)
 
         phaseName = job.imgList{n}.ebsd.CSList{job.imgList{n}.ebsd.indexedPhasesId(1)}.mineral;
         %IPF-NORTH
-         ipfvec = vector3d(0,0,0);
-        [x1,y1] = nwse2EbsdPos(job.undistortedList{n}.ebsd,0,-1);
-        ipfvec.x = x1; ipfvec.y = y1; clearvars x1 y1; % direct assignment doesn't work properly for some reason
+        % (east,south) = (0,-1) is screen north, which the plotting
+        % convention publishes directly
+        ipfvec = job.undistortedList{n}.ebsd.how2plot.north;
 
 
 
