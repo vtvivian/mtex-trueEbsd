@@ -37,7 +37,7 @@ elseif e==vector3d.X && n==vector3d.Y && o==vector3d.Z %3
 
 elseif e==vector3d.Y && n==vector3d.X && o==-vector3d.Z %4
     % rotate
-    ebsdImg = rot90(ebsdImg,-3);
+    ebsdImg = rot90(ebsdImg,-1);
     % flipud/lr
     % ebsdImg = flip(ebsdImg);
 
@@ -62,7 +62,7 @@ elseif e==-vector3d.X && n==-vector3d.Y && o==vector3d.Z %7
 
 elseif e==-vector3d.Y && n==-vector3d.X && o==-vector3d.Z %8
     % rotate
-    ebsdImg = rot90(ebsdImg,-1);
+    ebsdImg = rot90(ebsdImg,-3);
     % flipud/lr
     % ebsdImg = flip(ebsdImg);
 
