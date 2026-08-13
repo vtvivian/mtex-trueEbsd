@@ -100,9 +100,12 @@ classdef distortedImg
         ebsd = EBSD % @EBSD or @EBSDSquare MTEX object, same pixel positions 
         % as disImg.img
         pixelTime = 0 % EBSD exposure time or image pixel dwell time in ms
-        how2plot = plottingConvention(-vector3d.Z,vector3d.X) %from 
-        % option 'how2plot', <MTEX @plottingConvention> - defaults 
-        % to 'axis image'
+        how2plot = plottingConvention.ij %from
+        % option 'how2plot', <MTEX @plottingConvention> - defaults
+        % to 'axis image', i.e. +X east, +Y south, +Z into the screen.
+        % plottingConvention.ij is MTEX 7's name for exactly that
+        % convention (verified identical to the pre-MTEX-7 spelling
+        % plottingConvention(-vector3d.Z, vector3d.X))
         highContrast = nan %from option 'highContrast', <1 or 0>, scalar/logical 
         % 1 = good edge contrast, 0 = poor edge contrast
         edgePadWidth = 1 %from option 'edgePadWidth',<integer number of pixels> 
@@ -141,7 +144,7 @@ classdef distortedImg
 
             % handle optional inputs
             disImg.pixelTime = get_option(varargin,'pixelTime',0,{'double';'single';'uint8';'uint16';'uint32'});
-            disImg.how2plot  = get_option(varargin,'how2plot',plottingConvention(-vector3d.Z,vector3d.X),{'plottingConvention'});
+            disImg.how2plot  = get_option(varargin,'how2plot',plottingConvention.ij,{'plottingConvention'});
 
             % import EBSD object
             [disImg.ebsd,varargin] = getClass(varargin,'EBSD');  % includes EBSDSquare and EBSDHex

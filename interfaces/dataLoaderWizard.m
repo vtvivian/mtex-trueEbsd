@@ -117,7 +117,7 @@ end
 
         % load the EBSD map and rotate everything into matlab image
         % coordinate frame
-        pC = plottingConvention(-vector3d.Z,vector3d.X); pC.makeDefault;
+        pC = plottingConvention.ij; pC.makeDefault;
         ebsd = gridify(rotate(EBSD.load(fullfile(dataPath,f1)),rot,'keepXY'));
         assert(isa(ebsd,'EBSDsquare'),"EBSD map must be in square grid format!");
         ebsd.how2plot = pC;
@@ -138,7 +138,19 @@ end
             % load images inside h5oina container
             disp(append("Loooking for images in file", f1, ": "));
 
-            h5ImgsNames = fieldnames(h5Imgs.opt.Images);
+            % MTEX 7 stores the images that ship inside an h5oina container
+            % in ebsd.opt.electron_image; up to MTEX 6 the same struct was
+            % ebsd.opt.Images. The contents are identical, so accept either.
+            if isfield(h5Imgs.opt,'electron_image')
+                h5ImgStruct = h5Imgs.opt.electron_image;
+            elseif isfield(h5Imgs.opt,'Images')
+                h5ImgStruct = h5Imgs.opt.Images;
+            else
+                error(['No images found in ' char(f1) '. Expected them in ' ...
+                    'ebsd.opt.electron_image (MTEX 7) or ebsd.opt.Images (MTEX 6).']);
+            end
+
+            h5ImgsNames = fieldnames(h5ImgStruct);
             % only get image number from one of the 5 FSD diodes
             fsdNums = extractAfter(h5ImgsNames,'Lower_Centre_');fsdNums(cellfun(@isempty,fsdNums))=[];
             % get other SEM image names
@@ -159,23 +171,23 @@ end
             for nn=1:numel(fsdNums)
                 nexttile;
                 imagesc(rescale(im2double(cat(3,...
-                    h5Imgs.opt.Images.(['Lower_Centre_' fsdNums{nn}]), ...
-                    h5Imgs.opt.Images.(['Lower_Left_' fsdNums{nn}]), ...
-                    h5Imgs.opt.Images.(['Lower_Right_' fsdNums{nn}])))));
+                    h5ImgStruct.(['Lower_Centre_' fsdNums{nn}]), ...
+                    h5ImgStruct.(['Lower_Left_' fsdNums{nn}]), ...
+                    h5ImgStruct.(['Lower_Right_' fsdNums{nn}])))));
                 axis image off ij;
                 title(['FSD Lower ' fsdNums{nn}],'Interpreter','none');
 
                 nexttile;
                 imagesc(rescale(im2double(mean(cat(3,...
-                    h5Imgs.opt.Images.(['Upper_Left_' fsdNums{nn}]), ...
-                    h5Imgs.opt.Images.(['Upper_Right_' fsdNums{nn}])),3))));
+                    h5ImgStruct.(['Upper_Left_' fsdNums{nn}]), ...
+                    h5ImgStruct.(['Upper_Right_' fsdNums{nn}])),3))));
                 colormap gray; axis image off ij;
                 title(['FSD Upper ' fsdNums{nn}],'Interpreter','none');
             end
             % SEM images
             for nn=1:numel(semNames)
                 nexttile;
-                imagesc(rescale(im2double(h5Imgs.opt.Images.(semNames{nn}))));
+                imagesc(rescale(im2double(h5ImgStruct.(semNames{nn}))));
                 colormap gray; axis image off ij;
                 title(semNames{nn},'Interpreter','none');
             end
@@ -192,7 +204,7 @@ end
             while keepLoading1
                 imgN = imgN+1;
                 [imgs1{imgN},keepLoading1] = selectImage;
-                dxy(imgN) = double(h5Imgs.opt.Images.Header.X_Step);
+                dxy(imgN) = double(h5ImgStruct.Header.X_Step);
 
             end
 
@@ -232,18 +244,18 @@ end
                 % FSD upper diodes get averaged and loaded as greyscale
                 imgNumSuffix = extractAfter(h5ImgsList_all{indx},'FSD Upper ');
                 img1 = rescale(im2double(mean(cat(3,...
-                    h5Imgs.opt.Images.(['Upper_Left_' imgNumSuffix]), ...
-                    h5Imgs.opt.Images.(['Upper_Right_' imgNumSuffix]) ),3)));
+                    h5ImgStruct.(['Upper_Left_' imgNumSuffix]), ...
+                    h5ImgStruct.(['Upper_Right_' imgNumSuffix]) ),3)));
             elseif  contains(h5ImgsList_all{indx}, "Lower") && contains(h5ImgsList_all{indx}, "FSD")
                 % FSD lower diodes get loaded as RGB colour
                 imgNumSuffix = extractAfter(h5ImgsList_all{indx},'FSD Lower ');
                 img1 = rescale(im2double(cat(3,...
-                    h5Imgs.opt.Images.(['Lower_Centre_' imgNumSuffix]), ...
-                    h5Imgs.opt.Images.(['Lower_Left_' imgNumSuffix]), ...
-                    h5Imgs.opt.Images.(['Lower_Right_' imgNumSuffix]) )));
+                    h5ImgStruct.(['Lower_Centre_' imgNumSuffix]), ...
+                    h5ImgStruct.(['Lower_Left_' imgNumSuffix]), ...
+                    h5ImgStruct.(['Lower_Right_' imgNumSuffix]) )));
             else
                 % all other SEM images get loaded as greyscale
-                img1 = rescale(im2double(h5Imgs.opt.Images.(h5ImgsList_all{indx})));
+                img1 = rescale(im2double(h5ImgStruct.(h5ImgsList_all{indx})));
             end
         end
 
