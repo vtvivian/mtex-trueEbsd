@@ -144,7 +144,6 @@ classdef distortedImg
 
             % handle optional inputs
             disImg.pixelTime = get_option(varargin,'pixelTime',0,{'double';'single';'uint8';'uint16';'uint32'});
-            disImg.how2plot  = get_option(varargin,'how2plot',plottingConvention.ij,{'plottingConvention'});
 
             % import EBSD object
             [disImg.ebsd,varargin] = getClass(varargin,'EBSD');  % includes EBSDSquare and EBSDHex
@@ -162,11 +161,21 @@ classdef distortedImg
                 disImg.dx = double(disImg.ebsd.d2.norm);
                 disImg.dy = double(disImg.ebsd.d1.norm); % dx/dy match to d1/d2 is arbitrary here -- depends on ebsd.how2plot
 
+                % an EBSD map already knows how it is meant to be shown, so
+                % default to that. These two have to agree: pixelSizeMatch
+                % stamps disImg.how2plot onto the EBSD object it rebuilds,
+                % so a disagreement makes undistort read the map back with a
+                % different permutation than it was written with.
+                disImg.how2plot = get_option(varargin,'how2plot', ...
+                    disImg.ebsd.how2plot,{'plottingConvention'});
+
                 % extract img if required
                 if isa(img,'char')
                     disImg.img = im2double(ebsdSquare2ij(disImg.ebsd,img,disImg.how2plot));
                 end
             else
+                disImg.how2plot = get_option(varargin,'how2plot', ...
+                    plottingConvention.ij,{'plottingConvention'});
                 dxy = get_option(varargin,'dxy',0,{'double';'single';'uint8';'uint16';'uint32'});
                 disImg.dx = double(dxy(1));
                 disImg.dy = double(dxy(end));

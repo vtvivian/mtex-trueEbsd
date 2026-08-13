@@ -30,12 +30,37 @@ fprintf('MTEX %s on MATLAB %s\n', getMTEXpref('version'), version('-release'));
 conventions = { plottingConvention.ij, ...                      % case 1
                 plottingConvention(-vector3d.Z,vector3d.Y) };   % case 4
 
+checkHow2plotDefault(conventions{2});
+
 for c = 1:numel(conventions)
     fprintf('\n--- plotting convention %s ---\n', char(conventions{c}));
     runWorkflow(conventions{c});
 end
 
 fprintf('\n=== ALL ACCEPTANCE CHECKS PASSED ===\n');
+end
+
+% =========================================================================
+function checkHow2plotDefault(how2plot)
+% A @distortedImg carrying an @EBSD map must adopt that map's convention
+% unless told otherwise. It used to default to plottingConvention.ij
+% regardless, so a caller who omitted 'how2plot' got an image extracted
+% under one convention and a map later re-stamped with another.
+
+ebsd = gridify(mtexdata('twins'));
+ebsd.how2plot = how2plot;
+
+disImg = distortedImg('bc','shift',ebsd);
+assert(isapprox(disImg.how2plot,ebsd.how2plot), ...
+    'distortedImg ignored the EBSD map''s plotting convention');
+
+% an explicit option still wins
+disImg = distortedImg('bc','shift',ebsd,'how2plot',plottingConvention.ij);
+assert(isapprox(disImg.how2plot,plottingConvention.ij), ...
+    'explicit how2plot was overridden');
+
+fprintf('how2plot default OK: adopted %s from the map\n', char(how2plot));
+
 end
 
 % =========================================================================
