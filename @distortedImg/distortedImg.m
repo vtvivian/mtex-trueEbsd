@@ -100,9 +100,12 @@ classdef distortedImg
         ebsd = EBSD % @EBSD or @EBSDSquare MTEX object, same pixel positions 
         % as disImg.img
         pixelTime = 0 % EBSD exposure time or image pixel dwell time in ms
-        how2plot = plottingConvention(-vector3d.Z,vector3d.X) %from 
-        % option 'how2plot', <MTEX @plottingConvention> - defaults 
-        % to 'axis image'
+        how2plot = plottingConvention.ij %from
+        % option 'how2plot', <MTEX @plottingConvention> - defaults
+        % to 'axis image', i.e. +X east, +Y south, +Z into the screen.
+        % plottingConvention.ij is MTEX 7's name for exactly that
+        % convention (verified identical to the pre-MTEX-7 spelling
+        % plottingConvention(-vector3d.Z, vector3d.X))
         highContrast = nan %from option 'highContrast', <1 or 0>, scalar/logical 
         % 1 = good edge contrast, 0 = poor edge contrast
         edgePadWidth = 1 %from option 'edgePadWidth',<integer number of pixels> 
@@ -141,7 +144,6 @@ classdef distortedImg
 
             % handle optional inputs
             disImg.pixelTime = get_option(varargin,'pixelTime',0,{'double';'single';'uint8';'uint16';'uint32'});
-            disImg.how2plot  = get_option(varargin,'how2plot',plottingConvention(-vector3d.Z,vector3d.X),{'plottingConvention'});
 
             % import EBSD object
             [disImg.ebsd,varargin] = getClass(varargin,'EBSD');  % includes EBSDSquare and EBSDHex
@@ -159,11 +161,21 @@ classdef distortedImg
                 disImg.dx = double(disImg.ebsd.d2.norm);
                 disImg.dy = double(disImg.ebsd.d1.norm); % dx/dy match to d1/d2 is arbitrary here -- depends on ebsd.how2plot
 
+                % an EBSD map already knows how it is meant to be shown, so
+                % default to that. These two have to agree: pixelSizeMatch
+                % stamps disImg.how2plot onto the EBSD object it rebuilds,
+                % so a disagreement makes undistort read the map back with a
+                % different permutation than it was written with.
+                disImg.how2plot = get_option(varargin,'how2plot', ...
+                    disImg.ebsd.how2plot,{'plottingConvention'});
+
                 % extract img if required
                 if isa(img,'char')
                     disImg.img = im2double(ebsdSquare2ij(disImg.ebsd,img,disImg.how2plot));
                 end
             else
+                disImg.how2plot = get_option(varargin,'how2plot', ...
+                    plottingConvention.ij,{'plottingConvention'});
                 dxy = get_option(varargin,'dxy',0,{'double';'single';'uint8';'uint16';'uint32'});
                 disImg.dx = double(dxy(1));
                 disImg.dy = double(dxy(end));

@@ -288,9 +288,15 @@ plot(job.undistortedList(1).ebsd('W C'), job.undistortedList(1).ebsd('W C').orie
     job.undistortedList(1).ebsd.how2plot,'coordinates','on');
 title('Undistorted MTEX EBSD map (WC IPF-out of screen)','Color','k');
 for n=1:numel(job.undistortedList)
+    % plotting onto an EBSD map needs one value per pixel, but images may
+    % carry several channels (fsdB3 is a 3-channel colour image), so average
+    % multi-channel images down to one channel first
+    imgOut = job.undistortedList(n).img;
+    if size(imgOut,3) > 1, imgOut = mean(imgOut,3); end
+
     nextAxis;
     plot(job.undistortedList(1).ebsd, ...
-        ij2EbsdSquare(job.undistortedList(1).ebsd,job.undistortedList(n).img), ...
+        ij2EbsdSquare(job.undistortedList(1).ebsd,imgOut), ...
         job.undistortedList(1).ebsd.how2plot,'coordinates','on');
     mtexColorMap gray;
     title(['Undistorted MTEX image ' num2str(n)],'Color','k');

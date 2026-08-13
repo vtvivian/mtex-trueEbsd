@@ -112,7 +112,11 @@ for n=numel(job.resizedList):-1:1
         phase1 = ebsdMap0;
         phase1(ix) = job.resizedList(n).ebsd(ebsdNewId(ix)).phase;
         % recreate EBSD object
-        ebsd1 = EBSD(job.resizedList(n).ebsd.pos, rot1, phase1, ...
+        % flatten to one point per row: the @EBSD constructor expects that,
+        % and MTEX 7's gridify hangs on a map-shaped @EBSD rather than
+        % rejecting it. gridify below restores the r*c shape.
+        prop1 = structfun(@(v) v(:), prop1, 'UniformOutput', false);
+        ebsd1 = EBSD(job.resizedList(n).ebsd.pos(:), rot1(:), phase1(:), ...
             job.resizedList(n).ebsd.CSList, prop1);
 
         % write to output
