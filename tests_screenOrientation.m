@@ -41,20 +41,34 @@ pcs = { plottingConvention(-vector3d.Z, vector3d.X), ...   % 1  e=+X n=-Y o=-Z
         plottingConvention(-vector3d.Z,-vector3d.Y)};      % 8  e=-Y n=-X o=-Z
 
 raw = mtexdata('twins');
+
+% Four grid layouts. gridify always orients a grid so the coordinates
+% increase along both directions, but a map does not have to arrive that
+% way: mtexdata('trueEbsdWCCo') is stored with d2 = -X, because its .mat
+% predates the layout being pinned down. Reversing a grid dimension
+% reproduces that, and it is the case that a tabulated permutation cannot
+% see - it has to be read off d1 and d2.
+layouts = { 'columnMajor',            gridify(raw), ...
+            'rowMajor',               gridify(raw,'rowMajor'), ...
+            'columnMajor, x reversed', subsref(gridify(raw), substruct('()',{':',size(gridify(raw),2):-1:1})), ...
+            'columnMajor, y reversed', subsref(gridify(raw), substruct('()',{size(gridify(raw),1):-1:1,':'})) };
+
 fails = {};
 
-for layout = ["columnMajor" "rowMajor"]
+for L = 1:2:numel(layouts)
 
-    ebsd = gridify(raw,char(layout));
+    name = layouts{L};
+    ebsd = layouts{L+1};
     assert(isa(ebsd,'EBSDsquare'),'test needs a square grid dataset');
     assert(size(ebsd,1) ~= size(ebsd,2), ...
         'test needs a non-square map, or a transpose cannot be detected');
 
-    fprintf('%s layout, %s map\n', layout, mat2str(size(ebsd)));
+    fprintf('%s, %s map, d1 %s d2 %s\n', name, mat2str(size(ebsd)), ...
+        char(normalize(ebsd.d1)), char(normalize(ebsd.d2)));
 
     for k = 1:numel(pcs)
         ebsd.how2plot = pcs{k};
-        tag = sprintf('%s case %d (%s)', layout, k, char(pcs{k}));
+        tag = sprintf('%s case %d (%s)', name, k, char(pcs{k}));
         fails = [fails, runChecks(ebsd,pcs{k},tag)]; %#ok<AGROW>
     end
     fprintf('\n');

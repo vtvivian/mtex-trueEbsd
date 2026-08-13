@@ -230,9 +230,16 @@ for n = 1:numel(job.imgList)
                    job.resizedList(n).pos.y .* pC.south;
         posEbsdX = posEbsd.x;
         posEbsdY = posEbsd.y;
+        % NB these three ij2EbsdSquare calls - here and on ebsdNewId below -
+        % look removable: the same permutation is applied to all three, the
+        % shapes downstream all come from ebsdNewId, and everything is
+        % flattened with (:) before the @EBSD constructor, which lets
+        % gridify re-derive the layout from the positions anyway. Left in
+        % rather than removed on inspection; it wants a run of the real
+        % workflow to confirm, not an argument.
         posEbsdX=ij2EbsdSquare(job.imgList(n).ebsd, posEbsdX);
         posEbsdY=ij2EbsdSquare(job.imgList(n).ebsd, posEbsdY);
-        
+
 
         %transform image ij coordinates back into ebsd.pos xyz convention
         % function tools/ebsdSquare2ij is the reverse of ij2EbsdSquare 
